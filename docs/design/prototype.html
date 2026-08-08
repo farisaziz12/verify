@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #0a0a0a; }
+  body { font-family: Inter, system-ui, sans-serif; font-feature-settings: "calt","kern","liga","ss03"; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #ffffff; text-decoration: none; }
+  a:hover { color: #a1a1a1; }
+  button { font-family: inherit; font-feature-settings: inherit; }
+  ::selection { background: #2c3440; }
+  @keyframes vf-scan { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+  @keyframes vf-spin { to { transform: rotate(360deg); } }
+  @keyframes vf-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes vf-rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes vf-draw { from { stroke-dashoffset: 16; } to { stroke-dashoffset: 0; } }
+  @keyframes vf-pop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+  @keyframes vf-enter { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #0a0a0a; color: #ffffff; font-size: 14px; line-height: 1.6;">
+  <div style="max-width: 780px; margin: 0 auto; padding: 40px 24px 120px; display: flex; flex-direction: column; gap: 48px;">
+
+    <sc-if value="{{ isList }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 24px;">
+          <div style="font-size: 18px; font-weight: 500;">domains</div>
+          <button onClick="{{ goAdd }}" style="height: 32px; padding: 0 14px; border-radius: 6px; border: 1px solid #ffffff; background: #ffffff; color: #0a0a0a; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 150ms ease-out;" style-hover="background: #e8e8e8;">add domain</button>
+        </div>
+
+        <div data-vf-filter="1" style="position: relative; width: fit-content;">
+          <button onClick="{{ toggleFilter }}" aria-haspopup="true" aria-expanded="{{ filterOpen }}" style="height: 30px; padding: 0 10px 0 12px; border-radius: 6px; border: 1px solid #232323; background: #161616; color: #ffffff; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: border-color 150ms ease-out;" style-hover="border-color: #383838;">
+            <span style="color: #6b6b6b;">status</span>
+            <span>{{ filterLabel }}</span>
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#6b6b6b" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="transform: {{ filterChevron }}; transition: transform 160ms ease-out;"><path d="M2 3.5 L5 6.5 L8 3.5"></path></svg>
+          </button>
+          <sc-if value="{{ filterOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: 36px; left: 0; z-index: 20; min-width: 216px; border: 1px solid #232323; border-radius: 8px; background: #141414; padding: 4px; display: flex; flex-direction: column; animation: vf-rise 140ms ease-out;">
+              <sc-for list="{{ filters }}" as="f" hint-placeholder-count="5">
+                <button onClick="{{ f.pick }}" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 30px; padding: 0 8px; border: 0; border-radius: 6px; background: {{ f.bg }}; color: {{ f.color }}; font-size: 13px; text-align: left; cursor: pointer; transition: background 140ms ease-out;" style-hover="background: #1c1c1c;">
+                  <span style="display: inline-flex; align-items: center; gap: 8px;">
+                    <span style="width: 5px; height: 5px; border-radius: 50%; background: {{ f.dot }};"></span>
+                    <span>{{ f.label }}</span>
+                  </span>
+                  <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: {{ f.countColor }};">{{ f.count }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{ hasDomains }}" hint-placeholder-val="{{ true }}">
+          <div style="border: 1px solid #232323; border-radius: 8px; background: #111111; overflow: hidden;">
+            <div style="display: grid; grid-template-columns: 1fr 150px 110px; gap: 16px; padding: 9px 16px; border-bottom: 1px solid #232323; font-size: 12px; color: #6b6b6b; letter-spacing: 0.4px;">
+              <div>DOMAIN</div>
+              <div>STATUS</div>
+              <div style="text-align: right;">LAST CHECKED</div>
+            </div>
+            <sc-for list="{{ domains }}" as="row" hint-placeholder-count="5">
+              <button onClick="{{ row.open }}" style="width: 100%; display: grid; grid-template-columns: 1fr 150px 110px; align-items: center; gap: 16px; padding: 13px 16px; border: 0; border-bottom: 1px solid #1c1c1c; background: transparent; text-align: left; cursor: pointer; transition: background 140ms ease-out;" style-hover="background: #161616;">
+                <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: #ffffff;">{{ row.name }}</span>
+                <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: {{ row.color }};">
+                  <span style="width: 5px; height: 5px; border-radius: 50%; background: {{ row.color }}; flex: none;"></span>
+                  <span>{{ row.word }}</span>
+                </span>
+                <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; color: #6b6b6b; text-align: right;">{{ row.checked }}</span>
+              </button>
+            </sc-for>
+            <div style="padding: 11px 16px; font-size: 13px; color: #6b6b6b; display: flex; align-items: center; gap: 8px;">
+              <span>{{ listFoot }}</span>
+              <span data-vf-tip="1" style="position: relative; display: inline-flex;">
+                <button onClick="{{ listTipEnter }}" onMouseEnter="{{ listTipEnter }}" onMouseLeave="{{ listTipLeave }}" onBlur="{{ listTipLeave }}" aria-expanded="{{ listTipOpen }}" aria-label="how often domains are checked" style="width: 18px; height: 18px; display: grid; place-items: center; border: 0; padding: 0; border-radius: 50%; background: transparent; color: #5a5a5a; cursor: pointer; transition: color 140ms ease-out;" style-hover="color: #d4d4d4;" style-focus="color: #d4d4d4;">
+                  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="7" cy="7" r="5.6"></circle><path d="M7 6.4 V9.8"></path><circle cx="7" cy="4.3" r="0.5" fill="currentColor" stroke="none"></circle></svg>
+                </button>
+                <sc-if value="{{ listTipOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="position: absolute; bottom: 24px; left: -12px; z-index: 30; width: 260px; background: #1a1a1a; border: 1px solid #2c2c2c; border-radius: 8px; padding: 10px 12px; font-size: 12.5px; line-height: 1.55; color: #a1a1a1; text-wrap: pretty; box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: vf-rise 120ms ease-out;">checked every 10 seconds while pending, once a day after verification.</div>
+                </sc-if>
+              </span>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ noDomains }}" hint-placeholder-val="{{ false }}">
+          <div style="border: 1px solid #232323; border-radius: 8px; background: #111111; padding: 28px 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px;">
+            <div style="font-size: 14px; color: #a1a1a1; max-width: 62ch; text-wrap: pretty;">a domain is verified by publishing one txt record we give you; we check it, then keep checking it daily so the claim stays current.</div>
+            <button onClick="{{ goAdd }}" style="height: 32px; padding: 0 14px; border-radius: 6px; border: 1px solid #ffffff; background: #ffffff; color: #0a0a0a; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 150ms ease-out;" style-hover="background: #e8e8e8;">add domain</button>
+          </div>
+        </sc-if>
+
+        <button onClick="{{ toggleEmpty }}" style="align-self: flex-start; height: 28px; padding: 0 10px; border-radius: 6px; border: 1px solid #232323; background: transparent; color: #5a5a5a; font-size: 12.5px; cursor: pointer;" style-hover="color: #a1a1a1;">{{ emptyToggleLabel }}</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isAdd }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        <button onClick="{{ goList }}" style="font-size: 13px; color: #a1a1a1; background: transparent; border: 0; padding: 0; width: fit-content; cursor: pointer; transition: color 150ms ease-out;" style-hover="color: #ffffff;">← domains</button>
+        <div style="font-size: 18px; font-weight: 500;">add a domain</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; max-width: 480px;">
+          <label for="vf-domain" style="font-size: 13px; color: #a1a1a1;">domain</label>
+          <input id="vf-domain" autofocus value="{{ addValue }}" onChange="{{ onAddChange }}" onKeyDown="{{ onAddKey }}" placeholder="example.com" style="height: 36px; padding: 0 12px; border-radius: 6px; border: 1px solid {{ addBorder }}; background: #161616; color: #ffffff; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; outline: none; transition: border-color 150ms ease-out;" style-focus="border-color: #4a4a4a;" />
+          <div style="min-height: 20px; font-size: 12.5px; color: {{ hintColor }}; display: flex; align-items: center; gap: 6px;">
+            <span style="font-family: 'JetBrains Mono', ui-monospace, monospace;">{{ addHint }}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px;">
+            <button onClick="{{ onAddSubmit }}" style="height: 32px; padding: 0 14px; border-radius: 6px; border: 1px solid #ffffff; background: #ffffff; color: #0a0a0a; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 150ms ease-out;" style-hover="background: #e8e8e8;">add domain</button>
+            <span style="font-size: 12.5px; color: #6b6b6b;">we'll give you one txt record to publish.</span>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ true }}">
+    <div style="display: flex; flex-direction: column; gap: 48px;">
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      <button onClick="{{ goList }}" style="font-size: 13px; color: #a1a1a1; background: transparent; border: 0; padding: 0; width: fit-content; cursor: pointer; transition: color 150ms ease-out;" style-hover="color: #ffffff;">← domains</button>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 24px;">
+        <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 18px; font-weight: 500; letter-spacing: -0.2px;">{{ domain }}</div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ statusColor }};"></span>
+          <span style="font-size: 13px; color: {{ statusColor }};">{{ statusWord }}</span>
+        </div>
+      </div>
+    </div>
+
+    <sc-if value="{{ showSteps }}" hint-placeholder-val="{{ true }}">
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: -20px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0;">
+        <sc-for list="{{ steps }}" as="st" hint-placeholder-count="3">
+          <div style="display: flex; flex-direction: column; gap: 8px; padding-right: 16px;">
+            <div style="height: 2px; border-radius: 1px; background: {{ st.bar }}; position: relative; overflow: hidden;">
+              <span style="position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); animation: {{ st.barAnim }};"></span>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; color: #4f4f4f;">{{ st.n }}</span>
+              <span style="font-size: 13px; color: {{ st.color }};">{{ st.label }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ hasBanner }}" hint-placeholder-val="{{ false }}">
+      <div style="border: 1px solid {{ bannerBorder }}; border-radius: 8px; background: {{ bannerBg }}; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; margin-top: -24px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ bannerTone }};"></span>
+          <span style="font-size: 13.5px; font-weight: 500; color: {{ bannerTone }};">{{ bannerTitle }}</span>
+        </div>
+        <div style="font-size: 13.5px; color: #a1a1a1; max-width: 66ch; text-wrap: pretty;">{{ bannerBody }}</div>
+        <sc-if value="{{ hasGrace }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top: 4px; display: flex; align-items: center; gap: 10px;">
+            <div style="flex: 1; height: 2px; border-radius: 1px; background: #232323; overflow: hidden;">
+              <div style="height: 100%; width: {{ graceWidth }}; background: {{ bannerTone }}; transition: width 200ms ease-out;"></div>
+            </div>
+            <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; color: #6b6b6b; white-space: nowrap;">{{ graceLabel }}</div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <div style="border: 1px solid {{ statusCardBorder }}; border-radius: 8px; background: #111111; padding: 13px 16px; display: flex; flex-direction: column; gap: 8px; opacity: {{ statusOpacity }}; transition: opacity 150ms ease-out;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <sc-if value="{{ verifiedCheck }}" hint-placeholder-val="{{ false }}">
+          <span style="width: 18px; height: 18px; flex: none; display: grid; place-items: center; border-radius: 50%; border: 1px solid #2b3a31; background: #121a16;">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#58a97a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.3 L4.6 9 L10 3.2"></path></svg>
+          </span>
+        </sc-if>
+        <sc-if value="{{ notVerifiedCheck }}" hint-placeholder-val="{{ true }}">
+          <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ statusColor }}; flex: none;"></span>
+        </sc-if>
+        <span aria-live="polite" role="status" style="font-size: 14px; font-weight: 500;">{{ headline }}</span>
+        <span data-vf-tip="1" style="position: relative; display: inline-flex; flex: none;">
+          <button onClick="{{ statusTipEnter }}" onMouseEnter="{{ statusTipEnter }}" onMouseLeave="{{ statusTipLeave }}" onBlur="{{ statusTipLeave }}" aria-expanded="{{ statusTipOpen }}" aria-label="what this status means" style="width: 18px; height: 18px; display: grid; place-items: center; border: 0; padding: 0; border-radius: 50%; background: transparent; color: #5a5a5a; cursor: pointer; transition: color 140ms ease-out;" style-hover="color: #d4d4d4;" style-focus="color: #d4d4d4;">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="7" cy="7" r="5.6"></circle><path d="M7 6.4 V9.8"></path><circle cx="7" cy="4.3" r="0.5" fill="currentColor" stroke="none"></circle></svg>
+          </button>
+          <sc-if value="{{ statusTipOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; bottom: 24px; left: -12px; z-index: 30; width: 300px; background: #1a1a1a; border: 1px solid #2c2c2c; border-radius: 8px; padding: 10px 12px; font-size: 12.5px; line-height: 1.55; color: #a1a1a1; text-wrap: pretty; box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: vf-rise 120ms ease-out;">
+              <div>{{ diagLine }}</div>
+            </div>
+          </sc-if>
+        </span>
+        <span style="flex: 1;"></span>
+        <span style="display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: #6b6b6b;">
+          <span>{{ watchLabel }}</span>
+          <sc-if value="{{ polling }}" hint-placeholder-val="{{ true }}">
+            <span style="position: relative; display: block; width: 44px; height: 1px; background: #232323; overflow: hidden;">
+              <span style="position: absolute; inset: 0; background: linear-gradient(90deg, transparent, {{ statusColor }}, transparent); animation: vf-scan 2.4s ease-in-out infinite;"></span>
+            </span>
+          </sc-if>
+        </span>
+        <button onClick="{{ onCheck }}" onMouseEnter="{{ onBtnEnter }}" onMouseLeave="{{ onBtnLeave }}" style="display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 12px; border-radius: 6px; border: 1px solid #2c2c2c; background: #161616; color: #ffffff; font-size: 12.5px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 150ms ease-out, border-color 150ms ease-out;" style-hover="background: #1c1c1c; border-color: #383838;">
+          <sc-if value="{{ checking }}" hint-placeholder-val="{{ false }}">
+            <span style="width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #3a3a3a; border-top-color: #ffffff; animation: vf-spin 700ms linear infinite;"></span>
+          </sc-if>
+          <span>{{ checkLabel }}</span>
+        </button>
+      </div>
+      <sc-if value="{{ hasPing }}" hint-placeholder-val="{{ false }}">
+        <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; color: #6b6b6b;">{{ pingLine }}</div>
+      </sc-if>
+      <sc-if value="{{ hasEvidence }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top: 2px; display: grid; grid-template-columns: 76px 1fr; gap: 4px 12px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; border-left: 1px solid #232323; padding: 2px 0 2px 12px;">
+          <div style="color: #6b6b6b;">expected</div>
+          <div style="color: #a1a1a1; word-break: break-all;">{{ evExpected }}</div>
+          <div style="color: #6b6b6b;">found</div>
+          <div style="color: {{ evFoundColor }}; word-break: break-all;">{{ evFound }}</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ hasAction }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size: 13px; color: #ffffff; max-width: 64ch; text-wrap: pretty;">{{ nextAction }}</div>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ showRecordCard }}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between;">
+          <div style="font-size: 15px; font-weight: 500;">dns record</div>
+          <div style="font-size: 13px; color: #6b6b6b;">add this at your dns provider</div>
+        </div>
+        <div style="border: 1px solid #232323; border-radius: 8px; background: #111111; overflow: hidden;">
+          <div style="display: grid; grid-template-columns: 92px 1fr 32px; align-items: center; gap: 16px; padding: 12px 16px; border-bottom: 1px solid #232323;">
+            <div style="font-size: 12px; color: #6b6b6b; letter-spacing: 0.4px;">TYPE</div>
+            <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px;">TXT</div>
+            <div></div>
+          </div>
+          <div style="display: grid; grid-template-columns: 92px 1fr 32px; align-items: center; gap: 16px; padding: 12px 16px; border-bottom: 1px solid #232323;">
+            <div style="font-size: 12px; color: #6b6b6b; letter-spacing: 0.4px;">NAME</div>
+            <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; word-break: break-all;">{{ recordName }}</div>
+            <button onClick="{{ copyName }}" aria-label="copy record name" style="width: 28px; height: 28px; display: grid; place-items: center; background: transparent; border: 1px solid #232323; border-radius: 6px; color: #a1a1a1; cursor: pointer; transition: background 150ms ease-out, color 150ms ease-out;" style-hover="background: #161616; color: #ffffff;">
+              <sc-if value="{{ copiedName }}" hint-placeholder-val="{{ false }}">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.3 L4.6 9 L10 3.2"></path></svg>
+              </sc-if>
+              <sc-if value="{{ notCopiedName }}" hint-placeholder-val="{{ true }}">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3.6" y="3.6" width="7" height="7" rx="1.5"></rect><path d="M8.4 1.4 H2.9 A1.5 1.5 0 0 0 1.4 2.9 V8.4"></path></svg>
+              </sc-if>
+            </button>
+          </div>
+          <div style="display: grid; grid-template-columns: 92px 1fr 32px; align-items: center; gap: 16px; padding: 12px 16px;">
+            <div style="font-size: 12px; color: #6b6b6b; letter-spacing: 0.4px;">VALUE</div>
+            <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; word-break: break-all;">{{ recordValue }}</div>
+            <button onClick="{{ copyValue }}" aria-label="copy record value" style="width: 28px; height: 28px; display: grid; place-items: center; background: transparent; border: 1px solid #232323; border-radius: 6px; color: #a1a1a1; cursor: pointer; transition: background 150ms ease-out, color 150ms ease-out;" style-hover="background: #161616; color: #ffffff;">
+              <sc-if value="{{ copiedValue }}" hint-placeholder-val="{{ false }}">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.3 L4.6 9 L10 3.2"></path></svg>
+              </sc-if>
+              <sc-if value="{{ notCopiedValue }}" hint-placeholder-val="{{ true }}">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3.6" y="3.6" width="7" height="7" rx="1.5"></rect><path d="M8.4 1.4 H2.9 A1.5 1.5 0 0 0 1.4 2.9 V8.4"></path></svg>
+              </sc-if>
+            </button>
+          </div>
+        </div>
+        <div style="margin-top: 2px;">
+          <div style="border-top: 1px solid #1c1c1c;">
+            <button onClick="{{ toggleHostQ }}" aria-expanded="{{ hostQOpen }}" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 2px; background: transparent; border: 0; color: #a1a1a1; font-size: 13px; text-align: left; cursor: pointer; transition: color 150ms ease-out;" style-hover="color: #ffffff;">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="transform: {{ hostQChevron }}; transition: transform 160ms ease-out;"><path d="M3.5 1.5 L7 5 L3.5 8.5"></path></svg>
+              <span>where does the NAME go? my provider's form looks different</span>
+            </button>
+            <div style="overflow: hidden; max-height: {{ hostQMax }}; opacity: {{ hostQOpacity }}; transition: max-height 180ms ease-out, opacity 150ms ease-out;">
+              <div style="padding: 0 0 14px 34px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #a1a1a1; max-width: 62ch; text-wrap: pretty;">
+                <div>every provider's form has a field for the record's name — it may be called <span style="color: #d4d4d4;">name</span>, <span style="color: #d4d4d4;">host</span>, or <span style="color: #d4d4d4;">hostname</span>. that's where the NAME from the card above goes.</div>
+                <div>type just <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; color: #d4d4d4;">_claim</span> there — most forms add your domain to the end for you. if the form shows the full name as you type, paste <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; color: #d4d4d4;">{{ recordName }}</span> instead.</div>
+                <div>not sure which you have? pick either — our check tells you what it found and how to fix it.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; align-items: baseline; justify-content: space-between;">
+          <div style="font-size: 15px; font-weight: 500;">setup by provider</div>
+          <div style="font-size: 13px; color: #6b6b6b;">step-by-step for common providers</div>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <sc-for list="{{ providers }}" as="p" hint-placeholder-count="4">
+            <div style="border-top: 1px solid #1c1c1c;">
+              <button onClick="{{ p.toggle }}" aria-expanded="{{ p.open }}" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 2px; background: transparent; border: 0; color: #a1a1a1; font-size: 13px; text-align: left; cursor: pointer; transition: color 150ms ease-out;" style-hover="color: #ffffff;">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="transform: {{ p.chevron }}; transition: transform 160ms ease-out;"><path d="M3.5 1.5 L7 5 L3.5 8.5"></path></svg>
+                <span>{{ p.name }}</span>
+              </button>
+              <div style="overflow: hidden; max-height: {{ p.max }}; opacity: {{ p.opacity }}; transition: max-height 180ms ease-out, opacity 150ms ease-out;">
+                <ol style="margin: 0; padding: 0 0 8px 34px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #a1a1a1;">
+                  <sc-for list="{{ p.steps }}" as="s" hint-placeholder-count="3">
+                    <li style="padding-left: 2px;">{{ s }}</li>
+                  </sc-for>
+                </ol>
+                <div style="padding: 0 0 14px 34px;">
+                  <a href="{{ p.docsUrl }}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: #6b6b6b; transition: color 150ms ease-out;" style-hover="color: #ffffff;">{{ p.name }} docs
+                    <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8 L8 2"></path><path d="M3.5 2 H8 V6.5"></path></svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+          <div style="border-top: 1px solid #1c1c1c;">
+            <button onClick="{{ toggleOtherProvider }}" aria-expanded="{{ otherOpen }}" style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 2px; background: transparent; border: 0; color: #a1a1a1; font-size: 13px; text-align: left; cursor: pointer; transition: color 150ms ease-out;" style-hover="color: #ffffff;">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="transform: {{ otherChevron }}; transition: transform 160ms ease-out;"><path d="M3.5 1.5 L7 5 L3.5 8.5"></path></svg>
+              <span>my provider isn't listed</span>
+            </button>
+            <div style="overflow: hidden; max-height: {{ otherMax }}; opacity: {{ otherOpacity }}; transition: max-height 180ms ease-out, opacity 150ms ease-out;">
+              <ol style="margin: 0; padding: 0 0 14px 34px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #a1a1a1;">
+                <li style="padding-left: 2px;">find where dns records are managed — often called dns, dns records, or zone editor</li>
+                <li style="padding-left: 2px;">add a record of type TXT with host <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; color: #d4d4d4;">_claim</span></li>
+                <li style="padding-left: 2px;">paste the value from above, keep the default ttl, save</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ recordCollapsed }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid #232323; border-radius: 8px; background: #111111; padding: 12px 16px;">
+        <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: #a1a1a1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">TXT {{ recordName }} · {{ recordValue }}</div>
+        <div style="font-size: 13px; color: #6b6b6b; white-space: nowrap;">record in place</div>
+      </div>
+    </sc-if>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; align-items: baseline; justify-content: space-between;">
+        <div style="font-size: 15px; font-weight: 500;">activity</div>
+        <div style="font-size: 13px; color: #6b6b6b;">{{ checkCountLabel }}</div>
+      </div>
+      <div style="border: 1px solid #232323; border-radius: 8px; background: #111111;">
+        <sc-for list="{{ entries }}" as="e" hint-placeholder-count="4">
+          <div style="border-bottom: 1px solid #1c1c1c; animation: {{ e.anim }};">
+            <button onClick="{{ e.toggle }}" aria-expanded="{{ e.expanded }}" style="width: 100%; display: grid; grid-template-columns: 14px 96px 1fr auto; align-items: center; gap: 12px; padding: 11px 16px; background: transparent; border: 0; text-align: left; cursor: pointer; color: #ffffff; transition: background 140ms ease-out;" style-hover="background: #141414;">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#6b6b6b" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="transform: {{ e.chevron }}; transition: transform 160ms ease-out;"><path d="M3.5 1.5 L7 5 L3.5 8.5"></path></svg>
+              <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; color: #6b6b6b;">{{ e.time }}</span>
+              <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #d4d4d4;">
+                <span style="width: 5px; height: 5px; border-radius: 50%; background: {{ e.color }}; flex: none;"></span>
+                <span>{{ e.title }}</span>
+              </span>
+              <span style="font-size: 12.5px; color: #6b6b6b; font-family: 'JetBrains Mono', ui-monospace, monospace;">{{ e.rel }}</span>
+            </button>
+            <div style="overflow: hidden; max-height: {{ e.max }}; opacity: {{ e.opacity }}; transition: max-height 180ms ease-out, opacity 150ms ease-out;">
+              <div style="padding: 2px 16px 14px 42px; display: flex; flex-direction: column; gap: 10px;">
+                <sc-if value="{{ e.hasEvidence }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: grid; grid-template-columns: 72px 1fr; gap: 3px 12px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px; border-left: 1px solid #232323; padding-left: 12px;">
+                    <div style="color: #6b6b6b;">expected</div>
+                    <div style="color: #a1a1a1; word-break: break-all;">{{ e.expected }}</div>
+                    <div style="color: #6b6b6b;">found</div>
+                    <div style="color: {{ e.foundColor }}; word-break: break-all;">{{ e.found }}</div>
+                  </div>
+                </sc-if>
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12.5px;">
+                  <div style="color: #6b6b6b; letter-spacing: 0.3px;">query</div>
+                  <div style="color: #6b6b6b; letter-spacing: 0.3px; text-align: right;">latency</div>
+                  <sc-for list="{{ e.trail }}" as="t" hint-placeholder-count="2">
+                    <div style="color: #a1a1a1; word-break: break-all;">{{ t.line }}</div>
+                    <div style="color: #6b6b6b; text-align: right; white-space: nowrap;">{{ t.ms }}</div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+        <div style="padding: 11px 16px; font-size: 13px; color: #6b6b6b;">{{ footNote }}</div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <button onClick="{{ onDelete }}" data-vf="rm" style="height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid #232323; background: transparent; color: #a1a1a1; font-size: 13px; cursor: pointer; transition: color 150ms ease-out, border-color 150ms ease-out;" style-hover="color: #cf6b6b; border-color: #3a2a2a;">remove domain</button>
+    </div>
+    </div>
+    </sc-if>
+
+  </div>
+
+  <sc-if value="{{ deleteConfirm }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ overlayClick }}" style="position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 24px; background: rgba(6,6,6,0.72); animation: vf-fade 140ms ease-out;">
+      <div onClick="{{ stop }}" onKeyDown="{{ dialogKeyDown }}" ref="{{ dialogRef }}" role="dialog" aria-modal="true" aria-label="remove domain" style="width: 100%; max-width: 440px; background: #111111; border: 1px solid #232323; border-radius: 8px; animation: vf-rise 160ms ease-out;">
+        <sc-if value="{{ removed }}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 26px 20px; display: flex; align-items: center; gap: 14px;">
+            <span style="width: 26px; height: 26px; flex: none; display: grid; place-items: center; border-radius: 50%; border: 1px solid #2b3a31; background: #121a16; animation: vf-pop 480ms cubic-bezier(0.22, 0.61, 0.36, 1) both;">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="#58a97a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.9 L5.3 9.6 L10.6 3.6" stroke-dasharray="16" style="animation: vf-draw 620ms cubic-bezier(0.33, 0, 0.2, 1) 260ms both;"></path></svg>
+            </span>
+            <div style="display: flex; flex-direction: column; gap: 4px; animation: vf-rise 520ms cubic-bezier(0.22, 0.61, 0.36, 1) 160ms both;">
+              <div style="font-size: 14px; font-weight: 500;">{{ domain }} removed</div>
+              <div style="font-size: 13px; color: #a1a1a1;">we've stopped checking it. your txt record is still in your dns.</div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ deleteAsking }}" hint-placeholder-val="{{ true }}">
+        <div style="padding: 20px 20px 16px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-size: 15px; font-weight: 500;">remove this domain?</div>
+          <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: #d4d4d4;">{{ domain }}</div>
+          <div style="font-size: 13.5px; color: #a1a1a1; text-wrap: pretty;">we stop checking it and the claim is dropped. to claim it again you'll need a new token.</div>
+          <div style="font-size: 13.5px; color: #6b6b6b; text-wrap: pretty;">your txt record stays in your dns — you can remove it.</div>
+        </div>
+        <sc-if value="{{ deleteSimple }}" hint-placeholder-val="{{ true }}">
+          <div style="border-top: 1px solid #232323; padding: 12px 16px; display: flex; justify-content: flex-end; gap: 8px;">
+            <button onClick="{{ onDeleteNo }}" style="height: 32px; padding: 0 14px; border-radius: 6px; border: 1px solid #232323; background: transparent; color: #a1a1a1; font-size: 13px; cursor: pointer; transition: color 150ms ease-out, border-color 150ms ease-out;" style-hover="color: #ffffff; border-color: #383838;">cancel</button>
+            <button onClick="{{ onDeleteYes }}" style="height: 32px; padding: 0 14px; border-radius: 6px; border: 1px solid #3a2a2a; background: #1a1212; color: #cf6b6b; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 150ms ease-out, border-color 150ms ease-out;" style-hover="background: #221515; border-color: #4a3030;">remove domain</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ deleteSwipe }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top: 1px solid #232323; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px;">
+            <div ref="{{ trackRef }}" style="position: relative; height: 40px; border: 1px solid #232323; border-radius: 999px; background: #141414; overflow: hidden; touch-action: none; user-select: none;">
+              <div style="position: absolute; inset: 0 auto 0 0; width: {{ swipeFill }}; background: rgba(207,107,107,0.10); transition: {{ swipeTransition }};"></div>
+              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap; font-size: 13px; color: #6b6b6b; letter-spacing: 0.2px; pointer-events: none; opacity: {{ swipeLabelOpacity }}; transition: opacity 150ms ease-out;">slide to remove {{ domain }}</div>
+              <button onPointerDown="{{ onSwipeDown }}" onKeyDown="{{ onSwipeKey }}" aria-label="remove {{ domain }} — drag right, or press the right arrow key until it reaches the end" style="position: absolute; top: 3px; left: 3px; width: 46px; height: 32px; display: grid; place-items: center; padding: 0; border-radius: 999px; border: 1px solid #3a2a2a; background: #1a1212; color: #cf6b6b; cursor: grab; transform: translateX({{ swipeX }}); transition: {{ swipeTransition }};" style-focus="border-color: #cf6b6b;">
+                <svg width="14" height="12" viewBox="0 0 14 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6 H12"></path><path d="M8 2.5 L12 6 L8 9.5"></path></svg>
+              </button>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <div style="font-size: 12.5px; color: #6b6b6b;">this domain is verified — slide to confirm.</div>
+              <button onClick="{{ onDeleteNo }}" style="height: 30px; padding: 0 12px; border-radius: 6px; border: 1px solid #232323; background: transparent; color: #a1a1a1; font-size: 13px; cursor: pointer; transition: color 150ms ease-out, border-color 150ms ease-out;" style-hover="color: #ffffff; border-color: #383838;">cancel</button>
+            </div>
+          </div>
+        </sc-if>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:900,&quot;height&quot;:1100},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;detail&quot;,&quot;list&quot;,&quot;add&quot;],&quot;default&quot;:&quot;detail&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;diagnosis&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;RECORD_NOT_FOUND&quot;,&quot;RECORD_NAME_MISSING&quot;,&quot;TOKEN_MISMATCH&quot;,&quot;ZONE_NAME_APPENDED&quot;,&quot;DNS_UNREACHABLE&quot;,&quot;VERIFIED_OK&quot;],&quot;default&quot;:&quot;RECORD_NOT_FOUND&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;lifecycle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;temporarily_failed&quot;,&quot;expired&quot;,&quot;revoked&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;domain&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;example.com&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;}}">
+const TOKEN = "verify=k3n8xq2m4vp7hd1cf6ab9zrt5w";
+const GREEN = "#58a97a", AMBER = "#c99a4a", RED = "#cf6b6b", GRAY = "#7c7c7c", BLUE = "#7d9dc4";
+
+class Component extends DCLogic {
+  state = {
+    diagnosis: this.props.diagnosis || "RECORD_NOT_FOUND",
+    domain: this.props.domain || "example.com",
+    checking: false,
+    hoverBtn: false,
+    cooldownLeft: 0,
+    statusOpacity: 1,
+    copied: {},
+    openProvider: null,
+    openEntries: {},
+    deleting: false,
+    swipeX: 0,
+    swipeDrag: false,
+    removed: false,
+    screen: this.props.screen || "detail",
+    listEmpty: false,
+    addValue: "",
+    addTouched: false,
+    lifecycle: this.props.lifecycle || "auto",
+    tip: null,
+    filter: "all",
+    filterOpen: false,
+    lastCheckAgo: 0,
+    now: Date.now(),
+    entries: []
+  };
+
+  componentDidMount() {
+    const t0 = Date.now();
+    this.setState({
+      entries: [
+        this.mk("RECORD_NOT_FOUND", t0 - 42 * 1000, false),
+        this.mk("RECORD_NOT_FOUND", t0 - 3 * 60 * 1000, false),
+        this.mk("DNS_UNREACHABLE", t0 - 6 * 60 * 1000, false),
+        this.mk("RECORD_NAME_MISSING", t0 - 11 * 60 * 1000, false)
+      ]
+    });
+    this.onDocDown = e => {
+      const within = sel => e.target && e.target.closest && e.target.closest(sel);
+      if (this.state.filterOpen && !within("[data-vf-filter]")) this.setState({ filterOpen: false });
+      if (this.state.tip && !within("[data-vf-tip]")) this.setState({ tip: null });
+    };
+    document.addEventListener("pointerdown", this.onDocDown, true);
+    this.onKey = e => {
+      if (e.key !== "Escape") return;
+      if (this.state.tip) this.setState({ tip: null });
+      if (this.state.filterOpen) this.setState({ filterOpen: false });
+      if (this.state.deleting && !this.state.removed) this.closeDialog();
+    };
+    document.addEventListener("keydown", this.onKey);
+    this.prevFocus = null;
+    this.tick = setInterval(() => {
+      this.setState(s => ({ now: Date.now(), cooldownLeft: Math.max(0, s.cooldownLeft - 1) }));
+    }, 1000);
+    this.poll = setInterval(() => {
+      if (this.isPending() && !this.state.checking) this.runCheck(true);
+    }, 10000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.tick); clearInterval(this.poll); clearTimeout(this.rmTimer);
+    document.removeEventListener("pointerdown", this.onDocDown, true);
+    document.removeEventListener("keydown", this.onKey);
+  }
+  componentDidUpdate(prevProps) {
+    if (prevProps.diagnosis !== this.props.diagnosis && this.props.diagnosis) {
+      this.setState({ diagnosis: this.props.diagnosis });
+    }
+    if (prevProps.lifecycle !== this.props.lifecycle && this.props.lifecycle) {
+      this.setState({ lifecycle: this.props.lifecycle });
+    }
+    if (prevProps.screen !== this.props.screen && this.props.screen) {
+      this.setState({ screen: this.props.screen });
+    }
+    if (prevProps.domain !== this.props.domain && this.props.domain) {
+      this.setState({ domain: this.props.domain });
+    }
+  }
+
+  isPending() { const d = this.state.diagnosis; return d !== "VERIFIED_OK"; }
+
+  name() { return "_claim." + this.state.domain; }
+
+  mk(diag, ts, fresh, forDomain) {
+    const d = forDomain || this.state.domain || this.props.domain || "example.com";
+    const nm = "_claim." + d;
+    const base = {
+      id: Math.random().toString(36).slice(2),
+      ts, diag, fresh: !!fresh
+    };
+    const trails = {
+      VERIFIED_OK: [{ line: "TXT " + nm + " → \"" + TOKEN + "\"", ms: "31 ms" }],
+      RECORD_NOT_FOUND: [{ line: "TXT " + nm + " → NOERROR, 0 answers", ms: "38 ms" }],
+      RECORD_NAME_MISSING: [{ line: "TXT " + nm + " → NXDOMAIN", ms: "27 ms" }, { line: "SOA " + d + " → ns1." + d, ms: "24 ms" }],
+      TOKEN_MISMATCH: [{ line: "TXT " + nm + " → \"verify=8bq4me1xr7yn3kd6va2zpc9tsl\"", ms: "44 ms" }],
+      ZONE_NAME_APPENDED: [{ line: "TXT " + nm + " → NOERROR, 0 answers", ms: "36 ms" }, { line: "TXT " + nm + "." + d + " → \"" + TOKEN + "\"", ms: "41 ms" }],
+      DNS_UNREACHABLE: [{ line: "TXT " + nm + " → timeout after 2000 ms", ms: "—" }]
+    };
+    const titles = {
+      VERIFIED_OK: "record matches — verified",
+      RECORD_NOT_FOUND: "name exists, no txt records",
+      RECORD_NAME_MISSING: "record name does not exist",
+      TOKEN_MISMATCH: "txt record found, value does not match",
+      ZONE_NAME_APPENDED: "record found one level too deep",
+      DNS_UNREACHABLE: "couldn't check"
+    };
+    const evidence = {
+      TOKEN_MISMATCH: { expected: TOKEN, found: "verify=8bq4me1xr7yn3kd6va2zpc9tsl" },
+      ZONE_NAME_APPENDED: { expected: nm, found: nm + "." + d }
+    };
+    base.trail = trails[diag];
+    base.title = titles[diag];
+    base.evidence = evidence[diag] || null;
+    const tones = { VERIFIED_OK: GREEN, DNS_UNREACHABLE: GRAY, TOKEN_MISMATCH: AMBER, ZONE_NAME_APPENDED: AMBER, RECORD_NAME_MISSING: AMBER, RECORD_NOT_FOUND: BLUE };
+    base.color = tones[diag] || GRAY;
+    return base;
+  }
+
+  runCheck(passive) {
+    if (this.state.checking) return;
+    this.setState({ checking: true, statusOpacity: 1 });
+    setTimeout(() => {
+      this.setState(s => ({ statusOpacity: 0 }));
+      setTimeout(() => {
+        this.setState(s => ({
+          checking: false,
+          statusOpacity: 1,
+          cooldownLeft: passive ? s.cooldownLeft : 30,
+          entries: [this.mk(s.diagnosis, Date.now(), true), ...s.entries].slice(0, 12)
+        }));
+      }, 150);
+    }, passive ? 900 : 1400);
+  }
+
+  swipeMax() {
+    const w = this.trackEl ? this.trackEl.clientWidth : 0;
+    return Math.max(0, w - 46 - 6);
+  }
+  startSwipe(e) {
+    const startX = e.clientX, max = this.swipeMax();
+    this.setState({ swipeDrag: true });
+    const move = ev => {
+      const x = Math.min(max, Math.max(0, ev.clientX - startX));
+      this.setState({ swipeX: x });
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      const done = this.state.swipeX >= max - 3 && max > 0;
+      this.setState({ swipeDrag: false, swipeX: 0 });
+      if (done) this.confirmDelete();
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  }
+
+  normalize(raw) {
+    let v = (raw || "").trim().toLowerCase();
+    v = v.replace(/^[a-z]+:\/\//, "");
+    v = v.replace(/^www\./, "");
+    v = v.split("/")[0].split("?")[0].split("#")[0];
+    v = v.replace(/\.$/, "");
+    return v;
+  }
+  addError(clean, raw) {
+    if (!raw.trim()) return null;
+    if (!clean) return "enter a domain";
+    if (/[^a-z0-9.-]/.test(clean)) return "domains can only contain letters, numbers, hyphens and dots";
+    if (clean.indexOf(".") === -1) return "that's missing a top-level domain — try " + clean + ".com";
+    const suffixes = ["com", "net", "org", "io", "dev", "co.uk", "com.au"];
+    if (suffixes.indexOf(clean) > -1) return "that's a public suffix — you can't claim " + clean + ", only a domain under it";
+    if (/\.\./.test(clean) || /^[.-]/.test(clean) || /[.-]$/.test(clean)) return "check the dots and hyphens — that isn't a valid domain";
+    return null;
+  }
+
+  submitAdd() {
+    const clean = this.normalize(this.state.addValue);
+    const err = this.addError(clean, this.state.addValue || " ");
+    if (err || !clean) { this.setState({ addTouched: true }); return; }
+    this.setState({
+      screen: "detail",
+      domain: clean,
+      diagnosis: "RECORD_NOT_FOUND",
+      openEntries: {},
+      entries: [this.mk("RECORD_NOT_FOUND", Date.now(), true, clean)]
+    });
+  }
+
+  closeDialog() {
+    this.setState({ deleting: false });
+    if (this.prevFocus && this.prevFocus.focus) setTimeout(() => this.prevFocus && this.prevFocus.focus(), 0);
+  }
+
+  confirmDelete() {
+    this.setState({ removed: true, swipeX: 0 });
+    clearTimeout(this.rmTimer);
+    this.rmTimer = setTimeout(() => this.setState({ deleting: false, removed: false, screen: "list" }), 3800);
+  }
+
+  copy(key, text) {
+    try { navigator.clipboard && navigator.clipboard.writeText(text); } catch (e) {}
+    this.setState(s => ({ copied: Object.assign({}, s.copied, { [key]: true }) }));
+    setTimeout(() => this.setState(s => ({ copied: Object.assign({}, s.copied, { [key]: false }) })), 1200);
+  }
+
+  rel(ts) {
+    const d = Math.max(0, Math.round((this.state.now - ts) / 1000));
+    if (d < 10) return "just now";
+    if (d < 60) return d + "s ago";
+    if (d < 3600) return Math.floor(d / 60) + "m ago";
+    if (d < 86400) return Math.floor(d / 3600) + "h ago";
+    return Math.floor(d / 86400) + "d ago";
+  }
+  clock(ts) {
+    const dt = new Date(ts);
+    const p = n => String(n).padStart(2, "0");
+    return p(dt.getHours()) + ":" + p(dt.getMinutes()) + ":" + p(dt.getSeconds());
+  }
+
+  diagCopy() {
+    const d = this.state.diagnosis, dom = this.state.domain, nm = this.name();
+    switch (d) {
+      case "VERIFIED_OK":
+        return { word: "verified", color: GREEN, headline: "verified", line: "we found the txt record at " + nm + " and the value matches. this domain is yours.", action: null, evidence: null };
+      case "RECORD_NOT_FOUND":
+        return { word: "pending", color: BLUE, headline: "record not found yet", line: nm + " has no txt records yet. new records can take a few minutes to appear.", action: "no action needed if you just added it — we'll keep checking every 10 seconds.", evidence: null };
+      case "RECORD_NAME_MISSING":
+        return { word: "needs a fix", color: AMBER, headline: "record name doesn't exist", line: "nothing is published at " + nm + ".", action: "check the host field of your dns record. it should read _claim (or the full " + nm + " if your provider wants the whole name).", evidence: null };
+      case "TOKEN_MISMATCH":
+        return { word: "needs a fix", color: AMBER, headline: "value doesn't match", line: "a txt record exists, but its value isn't the token we issued.", action: "replace the value with the token above, exactly as shown.", evidence: { expected: TOKEN, found: "verify=8bq4me1xr7yn3kd6va2zpc9tsl", tone: AMBER } };
+      case "ZONE_NAME_APPENDED":
+        return { word: "needs a fix", color: AMBER, headline: "record is at the wrong name", line: "your provider appended " + dom + " to the host you typed.", action: "edit the record and put just _claim in the host field.", evidence: { expected: nm, found: nm + "." + dom, tone: AMBER } };
+      case "DNS_UNREACHABLE":
+        return { word: "couldn't check", color: GRAY, headline: "couldn't check", line: "our dns query timed out. this says nothing about your record.", action: "nothing for you to do. we'll try again on the next check.", evidence: null };
+      default:
+        return { word: "pending", color: GRAY, headline: "pending", line: "", action: null, evidence: null };
+    }
+  }
+
+  renderVals() {
+    const s = this.state, d = this.diagCopy();
+    const verified = s.diagnosis === "VERIFIED_OK";
+    const cool = s.cooldownLeft > 0;
+    const providerSteps = {
+      Cloudflare: ["dns → records → add record", "type TXT, name _claim (cloudflare appends the zone for you)", "paste the value, ttl auto, save"],
+      GoDaddy: ["dns → dns records → add", "type TXT, host _claim", "paste into txt value, ttl 1 hour, save"],
+      Namecheap: ["advanced dns → add new record", "type TXT record, host _claim", "paste into value, ttl automatic, save"],
+      "Route 53": ["hosted zone → create record", "record name _claim, type TXT", "value must be wrapped in double quotes, ttl 300, create"]
+    };
+    const providerDocs = {
+      Cloudflare: "https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-dns-records/",
+      GoDaddy: "https://www.godaddy.com/help/add-a-txt-record-19232",
+      Namecheap: "https://www.namecheap.com/support/knowledgebase/article.aspx/317/2237/how-do-i-add-txtspfdkimdmarc-records-for-my-domain/",
+      "Route 53": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-creating.html"
+    };
+    const providers = Object.keys(providerSteps).map(name => {
+      const open = s.openProvider === name;
+      return {
+        name, steps: providerSteps[name], docsUrl: providerDocs[name], open,
+        chevron: open ? "rotate(90deg)" : "rotate(0deg)",
+        max: open ? "220px" : "0px",
+        opacity: open ? 1 : 0,
+        toggle: () => this.setState(st => ({ openProvider: st.openProvider === name ? null : name }))
+      };
+    });
+    const entries = s.entries.map(e => {
+      const open = !!s.openEntries[e.id];
+      return {
+        id: e.id, title: e.title, color: e.color, expanded: open,
+        time: this.clock(e.ts), rel: this.rel(e.ts),
+        chevron: open ? "rotate(90deg)" : "rotate(0deg)",
+        max: open ? "260px" : "0px",
+        opacity: open ? 1 : 0,
+        anim: e.fresh ? "vf-enter 180ms ease-out" : "none",
+        trail: e.trail,
+        hasEvidence: !!e.evidence,
+        expected: e.evidence ? e.evidence.expected : "",
+        found: e.evidence ? e.evidence.found : "",
+        foundColor: AMBER,
+        toggle: () => this.setState(st => ({ openEntries: Object.assign({}, st.openEntries, { [e.id]: !st.openEntries[e.id] }) }))
+      };
+    });
+
+    const life = s.lifecycle && s.lifecycle !== "auto" ? s.lifecycle : (verified ? "verified" : "pending");
+    const tempFail = life === "temporarily_failed";
+    const lapsed = life === "expired" || life === "revoked";
+    const banners = {
+      temporarily_failed: {
+        tone: AMBER, bg: "#171310", border: "#382d1c",
+        title: "record missing since 04:12",
+        body: "this domain was verified on 12 jul. the txt record has not answered for 3 consecutive checks. republish it before the grace period ends and the verification stays in place.",
+        grace: { width: "22%", label: "68h 14m left of 72h" }
+      },
+      expired: {
+        tone: GRAY, bg: "#131313", border: "#2a2a2a",
+        title: "token expired",
+        body: "this domain was added on 24 jul and was not verified within 72 hours, so the token was retired. issue a new token to try again — the old value will no longer be accepted.",
+        grace: null
+      },
+      revoked: {
+        tone: GRAY, bg: "#131313", border: "#2a2a2a",
+        title: "verification revoked",
+        body: "the record stayed missing for the full 72-hour grace period, so the claim was dropped on 28 jul. issue a new token and republish the record to claim this domain again.",
+        grace: null
+      }
+    };
+    if (banners.temporarily_failed) {
+      const totalMin = 72 * 60, leftMin = 68 * 60 + 14;
+      const hrs = Math.floor(leftMin / 60), mins = leftMin % 60;
+      banners.temporarily_failed.grace = {
+        width: Math.round((leftMin / totalMin) * 100) + "%",
+        label: hrs + "h " + mins + "m left of 72h"
+      };
+    }
+    const banner = banners[life] || null;
+    const found = ["TOKEN_MISMATCH", "ZONE_NAME_APPENDED", "VERIFIED_OK"].indexOf(s.diagnosis) > -1;
+    const stage = verified ? 3 : found ? 2 : 1;
+    const stepDefs = [
+      { n: "01", label: "add the txt record" },
+      { n: "02", label: "we find it in dns" },
+      { n: "03", label: tempFail ? "verified 12 jul, record now missing" : "domain verified, checked daily" }
+    ];
+    const steps = stepDefs.map((st, i) => {
+      const idx = i + 1;
+      const done = verified || tempFail || idx < stage;
+      const current = !verified && !tempFail && idx === stage;
+      return {
+        n: st.n,
+        label: st.label,
+        color: tempFail && idx === 3 ? "#ffffff" : done ? "#d4d4d4" : current ? "#ffffff" : "#5a5a5a",
+        bar: tempFail && idx === 3 ? AMBER : done ? GREEN : current ? d.color : "#232323",
+        barAnim: current || (tempFail && idx === 3) ? "vf-scan 2.4s ease-in-out infinite" : "none"
+      };
+    });
+
+    const allRows = [
+      { name: "acme.dev", diag: "VERIFIED_OK", life: "auto", group: "verified", word: "verified", color: GREEN, checked: "2h ago" },
+      { name: "example.com", diag: "RECORD_NOT_FOUND", life: "auto", group: "pending", word: "pending", color: BLUE, checked: "8s ago" },
+      { name: "staging.acme.dev", diag: "TOKEN_MISMATCH", life: "auto", group: "fix", word: "needs a fix", color: AMBER, checked: "1m ago" },
+      { name: "api.acme.dev", diag: "RECORD_NOT_FOUND", life: "temporarily_failed", group: "fix", word: "record missing", color: AMBER, checked: "5m ago" },
+      { name: "old-brand.io", diag: "RECORD_NAME_MISSING", life: "expired", group: "lapsed", word: "expired", color: GRAY, checked: "3d ago", ago: 3 * 86400000 },
+      { name: "legacy.acme.io", diag: "RECORD_NOT_FOUND", life: "revoked", group: "lapsed", word: "revoked", color: GRAY, checked: "8d ago", ago: 8 * 86400000 }
+    ];
+    const filterDefs = [
+      { id: "all", label: "all", dot: "#3a3a3a" },
+      { id: "pending", label: "pending", dot: BLUE },
+      { id: "fix", label: "needs a fix", dot: AMBER },
+      { id: "verified", label: "verified", dot: GREEN },
+      { id: "lapsed", label: "lapsed", dot: GRAY }
+    ];
+    const filters = filterDefs.map(f => {
+      const on = s.filter === f.id;
+      return {
+        id: f.id, label: f.label, dot: f.dot,
+        count: f.id === "all" ? allRows.length : allRows.filter(r => r.group === f.id).length,
+        bg: on ? "#1c1c1c" : "transparent",
+        color: on ? "#ffffff" : "#a1a1a1",
+        countColor: on ? "#a1a1a1" : "#5a5a5a",
+        pick: () => this.setState({ filter: f.id, filterOpen: false })
+      };
+    });
+    const activeFilter = filterDefs.filter(f => f.id === s.filter)[0] || filterDefs[0];
+    const rows = allRows.filter(r => s.filter === "all" || r.group === s.filter).map(r => Object.assign({}, r, {
+      open: () => {
+        const back = r.ago || 8000;
+        this.setState({
+          screen: "detail", domain: r.name, diagnosis: r.diag, lifecycle: r.life,
+          lastCheckAgo: back,
+          entries: [this.mk(r.diag, Date.now() - back, false, r.name), this.mk(r.diag, Date.now() - back - 600000, false, r.name)],
+          openEntries: {}
+        });
+      }
+    }));
+    const clean = this.normalize(s.addValue);
+    const err = s.addTouched ? this.addError(clean, s.addValue) : null;
+
+    return {
+      isList: s.screen === "list",
+      isAdd: s.screen === "add",
+      isDetail: s.screen === "detail",
+      goList: () => this.setState({ screen: "list" }),
+      goAdd: () => this.setState({ screen: "add", addValue: "", addTouched: false }),
+      filters,
+      filterOpen: s.filterOpen,
+      filterLabel: activeFilter.label,
+      filterChevron: s.filterOpen ? "rotate(180deg)" : "rotate(0deg)",
+      toggleFilter: () => this.setState(st => ({ filterOpen: !st.filterOpen })),
+      domains: rows,
+      hasDomains: !s.listEmpty,
+      noDomains: s.listEmpty,
+      listFoot: rows.length + " domains",
+      listTipOpen: s.tip === "list",
+      listTipEnter: () => this.setState({ tip: "list" }),
+      listTipLeave: () => this.setState(st => st.tip === "list" ? { tip: null } : null),
+      statusTipOpen: s.tip === "status",
+      statusTipEnter: () => this.setState({ tip: "status" }),
+      statusTipLeave: () => this.setState(st => st.tip === "status" ? { tip: null } : null),
+      emptyToggleLabel: s.listEmpty ? "show populated list" : "show empty state",
+      toggleEmpty: () => this.setState(st => ({ listEmpty: !st.listEmpty })),
+      addValue: s.addValue,
+      addBorder: err ? "#3a2a2a" : "#232323",
+      addHint: err ? err : clean ? "will be added as " + clean : "we lowercase it and strip https:// and any path.",
+      hintColor: err ? "#cf6b6b" : clean ? "#a1a1a1" : "#5a5a5a",
+      onAddChange: e => this.setState({ addValue: e.target.value, addTouched: true }),
+      onAddKey: e => { if (e.key === "Enter") this.submitAdd(); },
+      onAddSubmit: () => this.submitAdd(),
+      steps,
+      showSteps: !lapsed,
+      hasBanner: !!banner,
+      bannerTone: banner ? banner.tone : GRAY,
+      bannerBg: banner ? banner.bg : "#131313",
+      bannerBorder: banner ? banner.border : "#232323",
+      bannerTitle: banner ? banner.title : "",
+      bannerBody: banner ? banner.body : "",
+      hasGrace: !!(banner && banner.grace),
+      graceWidth: banner && banner.grace ? banner.grace.width : "0%",
+      graceLabel: banner && banner.grace ? banner.grace.label : "",
+      domain: s.domain,
+      recordName: this.name(),
+      recordValue: TOKEN,
+      statusWord: lapsed ? life : tempFail ? "record missing" : d.word,
+      statusColor: lapsed ? GRAY : tempFail ? AMBER : d.color,
+      headline: lapsed ? "not being checked" : d.headline,
+      diagLine: lapsed ? "checks stopped when the token was retired. the last query, " + this.rel(Date.now() - (s.lastCheckAgo || 3 * 86400000)) + ", returned no txt record at " + this.name() + "." : d.line,
+      nextAction: lapsed ? "issue a new token to start over — you'll get a new value to publish." : d.action,
+      hasAction: lapsed ? true : !!d.action,
+      hasEvidence: !!d.evidence,
+      evExpected: d.evidence ? d.evidence.expected : "",
+      evFound: d.evidence ? d.evidence.found : "",
+      evFoundColor: d.evidence ? d.evidence.tone : AMBER,
+      statusOpacity: s.statusOpacity,
+      statusCardBorder: verified ? "#2b3a31" : "#232323",
+      verifiedCheck: verified && !tempFail && !lapsed,
+      notVerifiedCheck: !(verified && !tempFail && !lapsed),
+      hasPing: verified && !tempFail && !lapsed,
+      pingLine: "last verified ping 2h ago · next in ~22h",
+      showRecordCard: !verified && !lapsed,
+      recordCollapsed: verified,
+      polling: !verified && !lapsed,
+      watchLabel: lapsed ? "not being checked" : verified ? "re-checked daily" : "watching · every 10s",
+      checking: s.checking,
+      checkLabel: lapsed ? "issue a new token" : s.checking ? "checking…" : cool ? (s.hoverBtn ? "check again in " + s.cooldownLeft + "s" : "checked just now") : "check now",
+      onCheck: () => {
+        if (lapsed) { this.setState({ lifecycle: "auto", diagnosis: "RECORD_NOT_FOUND", entries: [] }); return; }
+        if (!cool) this.runCheck(false);
+      },
+      onBtnEnter: () => this.setState({ hoverBtn: true }),
+      onBtnLeave: () => this.setState({ hoverBtn: false }),
+      copiedName: !!s.copied.name,
+      notCopiedName: !s.copied.name,
+      copiedValue: !!s.copied.value,
+      notCopiedValue: !s.copied.value,
+      toggleHostQ: () => this.setState(st => ({ openProvider: st.openProvider === "__hostq" ? null : "__hostq" })),
+      hostQOpen: s.openProvider === "__hostq",
+      otherOpen: s.openProvider === "__other",
+      hostQChevron: s.openProvider === "__hostq" ? "rotate(90deg)" : "rotate(0deg)",
+      hostQMax: s.openProvider === "__hostq" ? "280px" : "0px",
+      hostQOpacity: s.openProvider === "__hostq" ? 1 : 0,
+      toggleOtherProvider: () => this.setState(st => ({ openProvider: st.openProvider === "__other" ? null : "__other" })),
+      otherChevron: s.openProvider === "__other" ? "rotate(90deg)" : "rotate(0deg)",
+      otherMax: s.openProvider === "__other" ? "220px" : "0px",
+      otherOpacity: s.openProvider === "__other" ? 1 : 0,
+      copyName: () => this.copy("name", this.name()),
+      copyValue: () => this.copy("value", TOKEN),
+      providers,
+      entries,
+      checkCountLabel: s.entries.length + " checks",
+      footNote: lapsed ? "domain added 24 jul" : tempFail ? "domain added 9 jul · verified 12 jul" : verified ? "domain added 3 days ago" : "domain added 14 minutes ago · token valid another 71h",
+      deleteConfirm: s.deleting,
+      deleteSimple: !verified,
+      deleteSwipe: verified,
+      trackRef: el => { this.trackEl = el; },
+      swipeX: (s.swipeX || 0) + "px",
+      swipeFill: ((s.swipeX || 0) + 46 + 3) + "px",
+      swipeTransition: s.swipeDrag ? "none" : "transform 180ms ease-out, width 180ms ease-out",
+      swipeLabelOpacity: s.swipeX > 12 ? 0 : 1,
+      onSwipeDown: e => this.startSwipe(e),
+      onSwipeKey: e => {
+        const max = this.swipeMax(), step = Math.max(24, max / 8);
+        if (e.key === "ArrowRight") {
+          e.preventDefault();
+          const x = Math.min(max, (this.state.swipeX || 0) + step);
+          this.setState({ swipeX: x });
+          if (max > 0 && x >= max - 3) this.confirmDelete();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          this.setState({ swipeX: Math.max(0, (this.state.swipeX || 0) - step) });
+        }
+      },
+      overlayClick: () => { if (!s.removed) this.closeDialog(); },
+      stop: (e) => e.stopPropagation(),
+      removed: s.removed,
+      deleteAsking: !s.removed,
+      dialogRef: el => {
+        this.dialogEl = el;
+        if (el && !this.state.removed) {
+          const f = el.querySelector("button");
+          if (f) setTimeout(() => f.focus(), 0);
+        }
+      },
+      dialogKeyDown: e => {
+        if (e.key !== "Tab" || !this.dialogEl) return;
+        const items = Array.prototype.filter.call(this.dialogEl.querySelectorAll("button"), b => !b.disabled);
+        if (!items.length) return;
+        const first = items[0], last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      },
+      onDelete: () => {
+        this.prevFocus = document.activeElement;
+        this.setState({ deleting: true, swipeX: 0, removed: false });
+      },
+      onDeleteYes: () => this.confirmDelete(),
+      onDeleteNo: () => this.closeDialog()
+    };
+  }
+}
+
+</script>
+</body>
+</html>
