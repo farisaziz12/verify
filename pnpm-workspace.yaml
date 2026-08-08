@@ -1,0 +1,4 @@
+# drizzle-kit pulls in esbuild, the only dependency in the tree with a postinstall.
+# pnpm 11 fails the install outright until each such package is explicitly allowed.
+allowBuilds:
+  esbuild: true
