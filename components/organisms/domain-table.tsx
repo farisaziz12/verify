@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Card } from '@/components/atoms/card'
 import { InfoTip } from '@/components/molecules/info-tip'
 import { RelativeTime } from '@/components/molecules/relative-time'
@@ -18,16 +19,17 @@ export function DomainTable({ domains }: { domains: Domain[] }) {
       </div>
 
       {domains.map((domain) => (
-        <div
+        <Link
           key={domain.id}
-          className={`${COLUMNS} border-edge-subtle items-center border-b px-4 py-3.5`}
+          href={`/domains/${domain.id}`}
+          className={`${COLUMNS} border-edge-subtle hover:bg-control focus-visible:outline-fg items-center border-b px-4 py-3.5 transition-colors focus-visible:-outline-offset-2 focus-visible:outline-2`}
         >
           <span className="text-fg text-ui font-mono">{domain.name}</span>
           <StatusIndicator status={domain.status} />
           <span className="text-fg-subtle text-hint text-right font-mono">
             <RelativeTime value={domain.lastCheckedAt} />
           </span>
-        </div>
+        </Link>
       ))}
 
       <div className="text-fg-subtle text-ui flex items-center gap-2 px-4 py-3">
