@@ -11,9 +11,20 @@ export interface TxtRecord {
 
 export type RecordType = 'TXT' | 'NS'
 
+/**
+ * An outcome together with the adapter that produced it.
+ *
+ * The resolver is reported per query rather than read from `Resolver.name` because a
+ * composed failover resolver answers as one of two adapters, and the trail has to say which.
+ */
+export interface QueryResult {
+  outcome: QueryOutcome
+  resolver: string
+}
+
 export interface Resolver {
   readonly name: string
-  query(name: string, type: RecordType): Promise<QueryOutcome>
+  query(name: string, type: RecordType): Promise<QueryResult>
 }
 
 /** One query, kept for the user-visible trail. */
