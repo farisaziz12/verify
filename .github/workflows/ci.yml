@@ -22,3 +22,5 @@ jobs:
         run: pnpm exec tsc --noEmit
       - name: Tests
         run: pnpm exec vitest run
+      - name: Build
+        run: pnpm exec next build
