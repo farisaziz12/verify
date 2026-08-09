@@ -2,14 +2,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import type { Domain } from '@/lib/db/schema'
+import { claimResultSchema } from '@/lib/db/wire'
 import { apiFetch } from '@/lib/query/fetcher'
 import { queryKeys } from '@/lib/query/keys'
-
-export interface ClaimResult {
-  domain: Domain
-  record: { name: string; value: string }
-}
 
 /**
  * Claims a domain, then invalidates every domains query and returns to the list.
@@ -23,7 +18,7 @@ export function useClaimDomain() {
 
   return useMutation({
     mutationFn: (name: string) =>
-      apiFetch<ClaimResult>('/api/domains', {
+      apiFetch('/api/domains', claimResultSchema, {
         method: 'POST',
         body: JSON.stringify({ name }),
       }),

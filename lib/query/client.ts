@@ -1,11 +1,12 @@
 import { environmentManager, QueryClient } from '@tanstack/react-query'
+import { SECOND } from '@/lib/time'
 
 function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
         // Non-zero so hydrated data is not thrown away and refetched the moment it lands.
-        staleTime: 30_000,
+        staleTime: 30 * SECOND,
         retry: 1,
       },
     },

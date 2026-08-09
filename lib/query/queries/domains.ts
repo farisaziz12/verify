@@ -1,56 +1,27 @@
 import { queryOptions } from '@tanstack/react-query'
-import type { Domain } from '@/lib/db/schema'
+import { domainDetailSchema, domainListSchema } from '@/lib/db/wire'
+import { isPending } from '@/lib/domain/status'
 import { apiFetch } from '@/lib/query/fetcher'
 import { queryKeys } from '@/lib/query/keys'
+import { SECOND } from '@/lib/time'
 
-const PENDING_POLL_MS = 10_000
+/** How often the list re-reads while a domain on it could still change. */
+const PENDING_POLL_MS = 10 * SECOND
 
-/**
- * Whether anything in the system can move a domain out of `pending` on its own.
- *
- * Flip to `true` with the verification engine (PR 5). Typed as `boolean` rather than
- * inferred as the literal `false` so the guarded branch stays reachable to the compiler.
- */
-const CHECKS_CAN_CHANGE_STATUS: boolean = false
-
-/**
- * The claimed domains, newest first.
- *
- * Shared by the server prefetch and the client `useQuery` so both sides agree on the key,
- * the fetcher, and the freshness window.
- */
+/** Newest first. Refetches every `PENDING_POLL_MS` only while a row is still pending. */
 export function domainsQueryOptions() {
   return queryOptions({
     queryKey: queryKeys.domains.list(),
-    queryFn: () => apiFetch<Domain[]>('/api/domains'),
-    refetchInterval: (query) => (hasWorkInFlight(query.state.data) ? PENDING_POLL_MS : false),
+    queryFn: () => apiFetch('/api/domains', domainListSchema),
+    refetchInterval: (query) =>
+      query.state.data?.some((row) => isPending(row.domain)) ? PENDING_POLL_MS : false,
   })
 }
 
-/** A domain plus the DNS record its owner needs to publish. */
-export interface DomainDetail {
-  domain: Domain
-  record: { name: string; value: string }
-}
-
+/** Never refetches on a timer; whoever runs a check invalidates this key. */
 export function domainQueryOptions(id: string) {
   return queryOptions({
     queryKey: queryKeys.domains.detail(id),
-    queryFn: () => apiFetch<DomainDetail>(`/api/domains/${id}`),
-    refetchInterval: (query) =>
-      hasWorkInFlight(query.state.data ? [query.state.data.domain] : undefined)
-        ? PENDING_POLL_MS
-        : false,
+    queryFn: () => apiFetch(`/api/domains/${id}`, domainDetailSchema),
   })
-}
-
-/**
- * Whether any domain could still change on its own, which is the only reason to poll.
- *
- * Self-terminating: once every domain reaches a settled state the interval returns `false`
- * and the timer stops, rather than polling a list that can no longer move.
- */
-function hasWorkInFlight(domains: Domain[] | undefined): boolean {
-  if (!CHECKS_CAN_CHANGE_STATUS || !domains) return false
-  return domains.some((domain) => domain.status === 'pending')
 }

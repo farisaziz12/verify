@@ -1,27 +1,51 @@
-import type { Envelope } from '@/lib/api/response'
+import { z } from 'zod'
 
 /** A non-2xx response, carrying the field the API blamed so a form can point at it. */
 export class ApiRequestError extends Error {
   readonly status: number
   readonly field: string | undefined
+  /** The envelope's `meta`, which carries things like `retryAfterSeconds` on a 429. */
+  readonly meta: Record<string, unknown> | null
 
-  constructor(message: string, status: number, field?: string) {
+  constructor(
+    message: string,
+    status: number,
+    options?: { field?: string; meta?: Record<string, unknown> | null },
+  ) {
     super(message)
     this.name = 'ApiRequestError'
     this.status = status
-    this.field = field
+    this.field = options?.field
+    this.meta = options?.meta ?? null
   }
 }
 
+/** The envelope every route returns. `data` is validated separately, by the caller's schema. */
+const envelopeSchema = z.object({
+  data: z.unknown(),
+  error: z.object({ message: z.string(), field: z.string().optional() }).nullable(),
+  meta: z.record(z.string(), z.unknown()).nullable(),
+})
+
 /**
- * Calls a route handler and unwraps the `{ data, error, meta }` envelope.
+ * Calls a route handler, unwraps the `{ data, error, meta }` envelope, and validates `data`
+ * against the caller's schema.
+ *
+ * Validating rather than asserting means a server that changes shape fails here, naming the
+ * field, instead of surfacing as `undefined` somewhere in a component. It is also what lets
+ * timestamps come back as `Date` rather than the ISO strings JSON actually carries.
  *
  * Resolves an absolute origin when running on the server so the same call works during
  * prefetch and in the browser — one queryFn, not two implementations of the same read.
  *
- * @throws {ApiRequestError} on any non-2xx response, or on an unreachable server.
+ * @throws {ApiRequestError} on a non-2xx response, an unreachable server, or a body that
+ * does not match `schema`.
  */
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+export async function apiFetch<T>(
+  path: string,
+  schema: z.ZodType<T>,
+  init?: RequestInit,
+): Promise<T> {
   let response: Response
   try {
     response = await fetch(`${origin()}${path}`, {
@@ -32,20 +56,33 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     throw new ApiRequestError('Could not reach the server. Check your connection.', 0)
   }
 
-  const body = (await response.json().catch(() => null)) as Envelope<T> | null
+  const raw: unknown = await response.json().catch(() => null)
+  const envelope = envelopeSchema.safeParse(raw)
 
   if (!response.ok) {
+    const error = envelope.success ? envelope.data.error : null
     throw new ApiRequestError(
-      body?.error?.message ?? 'Something went wrong. Try again.',
+      error?.message ?? 'Something went wrong. Try again.',
       response.status,
-      body?.error?.field,
+      {
+        ...(error?.field ? { field: error.field } : {}),
+        meta: envelope.success ? envelope.data.meta : null,
+      },
     )
   }
-  if (!body) {
+  if (!envelope.success) {
     throw new ApiRequestError('The server returned an unreadable response.', response.status)
   }
 
-  return body.data as T
+  const data = schema.safeParse(envelope.data.data)
+  if (!data.success) {
+    throw new ApiRequestError(
+      `The server returned an unexpected shape: ${z.prettifyError(data.error)}`,
+      response.status,
+    )
+  }
+
+  return data.data
 }
 
 /** Empty in the browser so requests stay relative; absolute on the server, which has no origin. */
