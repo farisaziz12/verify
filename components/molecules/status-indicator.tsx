@@ -1,20 +1,16 @@
 import { StatusDot } from '@/components/atoms/status-dot'
 import { classNames } from '@/lib/class-names'
-import type { DomainStatus } from '@/lib/db/schema'
-import { STATUS_PRESENTATION, type StatusTone } from '@/lib/domain/status'
+import { type StatusTone, TONE } from '@/lib/tone'
 
-const TONE_TEXT = {
-  verified: 'text-status-verified',
-  attention: 'text-status-attention',
-  pending: 'text-status-pending',
-  inactive: 'text-status-inactive',
-} satisfies Record<StatusTone, string>
-
-/** A dot and a word in the same colour. */
-export function StatusIndicator({ status }: { status: DomainStatus }) {
-  const { word, tone } = STATUS_PRESENTATION[status]
+/**
+ * A dot and a word in the same colour — deliberately not a pill.
+ *
+ * Takes what to say rather than working it out, so the list row and the detail header cannot
+ * end up describing the same domain differently.
+ */
+export function StatusIndicator({ word, tone }: { word: string; tone: StatusTone }) {
   return (
-    <span className={classNames('text-ui inline-flex items-center gap-2', TONE_TEXT[tone])}>
+    <span className={classNames('text-ui inline-flex items-center gap-2', TONE[tone].text)}>
       <StatusDot tone={tone} />
       {word}
     </span>

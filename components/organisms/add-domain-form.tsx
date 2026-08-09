@@ -10,19 +10,19 @@ const IDLE_HINT = 'We lowercase it and strip https:// and any path.'
 
 export function AddDomainForm() {
   const [value, setValue] = useState('')
-  const [attempted, setAttempted] = useState(false)
+  const [hasAttempted, setHasAttempted] = useState(false)
   const claim = useClaimDomain()
 
   const normalized = value.trim() ? normalizeDomain(value) : null
   const { hint, hintTone } = resolveHint({
     normalized,
     serverError: claim.error?.message ?? null,
-    attempted,
+    hasAttempted,
   })
 
   function submit() {
     if (claim.isPending) return
-    setAttempted(true)
+    setHasAttempted(true)
     if (!normalized?.ok) return
     claim.mutate(normalized.name)
   }
@@ -69,15 +69,15 @@ export function AddDomainForm() {
 function resolveHint({
   normalized,
   serverError,
-  attempted,
+  hasAttempted,
 }: {
   normalized: NormalizeResult | null
   serverError: string | null
-  attempted: boolean
+  hasAttempted: boolean
 }): { hint: string; hintTone: HintTone } {
   if (serverError) return { hint: serverError, hintTone: 'error' }
   if (!normalized) {
-    return attempted
+    return hasAttempted
       ? { hint: 'Enter a domain', hintTone: 'error' }
       : { hint: IDLE_HINT, hintTone: 'idle' }
   }

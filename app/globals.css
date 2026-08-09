@@ -26,10 +26,15 @@
   --spacing-control-sm: 30px;
   --spacing-control: 32px;
   --spacing-control-lg: 36px;
+  /* Tooltip body — wide enough for two lines of hint copy, narrow enough to stay readable. */
+  --spacing-tooltip: 280px;
+  /* Icon-button hit area for inline glyphs sitting on a text baseline. */
+  --spacing-tip: 18px;
+
+  --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.4);
 
   --color-page: #000;
   --color-card: #111;
-  --color-popover: #141414;
   --color-control: #161616;
   --color-tooltip: #1a1a1a;
   --color-selected: #1c1c1c;
@@ -40,6 +45,8 @@
   --color-edge-focus: #4a4a4a;
   --color-edge-danger: #3a2a2a;
   --color-edge-tooltip: #2c2c2c;
+  /* The verified card and its check badge share a green-tinted ring. */
+  --color-edge-verified: #2b3a31;
 
   --color-fg: #fff;
   --color-fg-bright: #d4d4d4;
@@ -56,7 +63,38 @@
   --color-status-attention: #c99a4a;
   --color-status-pending: #7d9dc4;
   --color-status-inactive: #7c7c7c;
-  --color-status-neutral: #3a3a3a;
+  /* Fill behind the verified checkmark — a green so dark it reads as a surface. */
+  --color-status-verified-surface: #121a16;
+
+  --text-step: 11.5px;
+  --text-step--line-height: 1.4;
+  --text-section: 15px;
+  --text-section--line-height: 1.4;
+}
+
+/* Sweeps a highlight across a progress or scanning bar. */
+@keyframes scan {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 body {

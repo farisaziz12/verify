@@ -11,7 +11,7 @@ export function RecordCard({ name, value }: { name: string; value: string }) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-[15px] font-medium">DNS record</h2>
+        <h2 className="text-section font-medium">DNS record</h2>
         <p className="text-fg-subtle text-ui">Add this at your DNS provider</p>
       </div>
 

@@ -1,3 +1,4 @@
+import { Mono } from '@/components/atoms/mono'
 import { Disclosure, DisclosureGroup } from '@/components/molecules/disclosure'
 
 interface Provider {
@@ -48,10 +49,6 @@ const PROVIDERS: Provider[] = [
   },
 ]
 
-const Mono = ({ children }: { children: string }) => (
-  <span className="text-fg-bright font-mono">{children}</span>
-)
-
 export function ProviderSetup({ recordName }: { recordName: string }) {
   return (
     <div className="flex flex-col gap-3">
@@ -79,7 +76,7 @@ export function ProviderSetup({ recordName }: { recordName: string }) {
       </DisclosureGroup>
 
       <div className="mt-5 flex items-baseline justify-between">
-        <h2 className="text-[15px] font-medium">Setup by provider</h2>
+        <h2 className="text-section font-medium">Setup by provider</h2>
         <p className="text-fg-subtle text-ui">Step-by-step for common providers</p>
       </div>
 

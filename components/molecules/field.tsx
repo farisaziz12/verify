@@ -44,7 +44,7 @@ export function Field({
         value={value}
         placeholder={placeholder}
         autoFocus={autoFocus}
-        invalid={hintTone === 'error'}
+        isInvalid={hintTone === 'error'}
         aria-describedby={hintId}
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={(event) => {

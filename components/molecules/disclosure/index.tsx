@@ -3,27 +3,14 @@
 import { Accordion } from 'radix-ui'
 import type { ReactNode } from 'react'
 
-/**
- * A single-open accordion. Radix supplies the heading semantics, `aria-expanded`, and the
- * arrow-key roving focus that a div-and-onClick version silently omits.
- */
-export function DisclosureGroup({ children }: { children: ReactNode }) {
-  return (
-    <Accordion.Root type="single" collapsible className="flex flex-col">
-      {children}
-    </Accordion.Root>
-  )
-}
-
-export function Disclosure({
-  value,
-  label,
-  children,
-}: {
+interface DisclosureProps {
+  /** Unique within its group; the group tracks which value is open. */
   value: string
   label: ReactNode
   children: ReactNode
-}) {
+}
+
+export function Disclosure({ value, label, children }: DisclosureProps) {
   return (
     <Accordion.Item value={value} className="border-edge-subtle border-t">
       <Accordion.Header>
@@ -48,7 +35,7 @@ export function Disclosure({
           <span>{label}</span>
         </Accordion.Trigger>
       </Accordion.Header>
-      <Accordion.Content className="overflow-hidden data-[state=closed]:animate-none">
+      <Accordion.Content className="overflow-hidden">
         <div className="text-fg-muted text-ui flex max-w-[62ch] flex-col gap-2 pt-1 pb-3.5 pl-[34px] text-pretty">
           {children}
         </div>
@@ -56,3 +43,5 @@ export function Disclosure({
     </Accordion.Item>
   )
 }
+
+export { DisclosureGroup } from './disclosure-group'
