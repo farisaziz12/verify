@@ -1,6 +1,6 @@
 import { Slot } from 'radix-ui'
 import type { ButtonHTMLAttributes } from 'react'
-import { cn } from '@/lib/cn'
+import { classNames } from '@/lib/class-names'
 
 type Variant = 'primary' | 'ghost' | 'link'
 type Size = 'sm' | 'md'
@@ -36,7 +36,7 @@ export function Button({
     <Root
       // Only a real <button> takes `type`; a slotted child may be an anchor, which does not.
       type={asChild ? type : (type ?? 'button')}
-      className={cn(
+      className={classNames(
         'rounded-control text-ui inline-flex cursor-pointer items-center justify-center transition-colors',
         'focus-visible:outline-fg focus-visible:outline-2 focus-visible:outline-offset-2',
         'disabled:cursor-not-allowed disabled:opacity-50',

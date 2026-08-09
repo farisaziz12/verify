@@ -1,7 +1,7 @@
 import { useId } from 'react'
 import { Input } from '@/components/atoms/input'
 import { Label } from '@/components/atoms/label'
-import { cn } from '@/lib/cn'
+import { classNames } from '@/lib/class-names'
 
 export type HintTone = 'idle' | 'preview' | 'error'
 
@@ -54,7 +54,7 @@ export function Field({
       <p
         id={hintId}
         aria-live="polite"
-        className={cn('text-hint min-h-5 font-mono', HINT_TONE[hintTone])}
+        className={classNames('text-hint min-h-5 font-mono', HINT_TONE[hintTone])}
       >
         {hint}
       </p>
