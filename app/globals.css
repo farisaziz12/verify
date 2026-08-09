@@ -1,17 +1,11 @@
 @import "tailwindcss";
 
-/* `inline` matters: --font-sans dereferences next/font's --font-inter, so the utility
-   must emit that variable directly rather than a reference that only resolves on the
-   element where next/font's class happens to sit. */
 @theme inline {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  /* CommitMono (design amendment 4) is not a Google font; it ships as a local woff2
-     with the first UI PR, so the platform stack stands in until then. */
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 body {
-  /* Design amendment 4: the prototype's #0a0a0a page becomes true black. */
   background: #000;
   color: #fff;
 }
