@@ -30,6 +30,10 @@ Violating one is a bug even if tests pass.
 8. No suppressions — no `biome-ignore`, `@ts-ignore`, `@ts-expect-error`. Fix the cause.
 9. Colours, type sizes, radii and control heights come from the tokens in
    `app/globals.css`. No hardcoded hex or arbitrary size in a component.
+10. Server state belongs to TanStack Query — no raw `fetch` in a component. Queries and
+    mutations live in `lib/query/`, keyed through the factory in `lib/query/keys.ts`.
+11. Comments state contract — ordering, preconditions, units. Rationale goes in
+    `docs/CODE-NOTES.md`, keyed to the file, so it can be pasted onto the PR diff.
 
 ## Where things are decided
 
