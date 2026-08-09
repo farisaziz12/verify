@@ -18,14 +18,14 @@ export async function POST(request: NextRequest) {
 
   const parsed = claimSchema.safeParse(body)
   if (!parsed.success) {
-    return fail(400, parsed.error.issues[0]?.message ?? 'Invalid request body.', 'name')
+    return fail(400, parsed.error.issues[0]?.message ?? 'Invalid request body.', { field: 'name' })
   }
 
   const normalized = normalizeDomain(parsed.data.name)
-  if (!normalized.ok) return fail(400, normalized.error, 'name')
+  if (!normalized.ok) return fail(400, normalized.error, { field: 'name' })
 
   const domain = await createDomain(normalized.name)
-  if (!domain) return fail(409, `${normalized.name} has already been claimed.`, 'name')
+  if (!domain) return fail(409, `${normalized.name} has already been claimed.`, { field: 'name' })
 
   return ok(
     {
