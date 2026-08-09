@@ -1,6 +1,7 @@
-import { sql } from 'drizzle-orm'
-import { index, integer, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { relations, sql } from 'drizzle-orm'
+import { index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { uuidv7 } from 'uuidv7'
+import type { Lookup } from '../dns/types'
 
 export const domainStatus = pgEnum('domain_status', [
   'pending',
@@ -10,7 +11,7 @@ export const domainStatus = pgEnum('domain_status', [
   'revoked',
 ])
 
-/** A claimed domain and its verification lifecycle state (SPEC §8). */
+/** A claimed domain and its verification lifecycle state. */
 export const domains = pgTable(
   'domains',
   {
@@ -34,3 +35,44 @@ export const domains = pgTable(
       .where(sql`${table.status} in ('pending', 'verified', 'temporarily_failed')`),
   ],
 )
+
+export const checkTrigger = pgEnum('check_trigger', ['manual', 'sweep'])
+
+export const checkVerdict = pgEnum('check_verdict', ['pass', 'fail', 'indeterminate'])
+
+/** One completed check and the evidence behind its verdict. */
+export const checks = pgTable(
+  'checks',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    domainId: uuid('domain_id')
+      .notNull()
+      .references(() => domains.id, { onDelete: 'cascade' }),
+    trigger: checkTrigger('trigger').notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }).notNull(),
+    /** The query trail, in the order it was walked. */
+    lookups: jsonb('lookups').$type<Lookup[]>().notNull(),
+    verdict: checkVerdict('verdict').notNull(),
+    diagnosisCode: text('diagnosis_code').notNull(),
+    evidence: jsonb('evidence'),
+    /** Advisory only. */
+    notes: jsonb('notes').$type<string[]>(),
+  },
+  (table) => [index('checks_domain_id_started_at_idx').on(table.domainId, table.startedAt.desc())],
+)
+
+export type Domain = typeof domains.$inferSelect
+export type Check = typeof checks.$inferSelect
+
+export type DomainStatus = (typeof domainStatus.enumValues)[number]
+
+export const domainsRelations = relations(domains, ({ many }) => ({
+  checks: many(checks),
+}))
+
+export const checksRelations = relations(checks, ({ one }) => ({
+  domain: one(domains, { fields: [checks.domainId], references: [domains.id] }),
+}))
