@@ -13,12 +13,8 @@ next-env.d.ts
 # local agent state
 .claude/
 
-# private working docs — superseded by docs/SPEC.md and docs/PLAN.md
-docs/KICKOFF.md
-docs/GAMEPLAN.md
-docs/PROCESS.md
-docs/TECH-SPEC.md
-docs/design/DESIGN.md
+# working docs — kept local; the README carries what a reader of the repo needs
+docs/
 
 .DS_Store
 .vercel
