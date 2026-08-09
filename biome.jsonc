@@ -3,7 +3,7 @@
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!docs/design/prototype.html", "!drizzle"]
+    "includes": ["**", "!docs/design/prototype.html", "!drizzle", "!lib/dns/__fixtures__"]
   },
   "css": { "parser": { "tailwindDirectives": true } },
   "formatter": {

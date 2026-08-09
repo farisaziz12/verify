@@ -1,0 +1,22 @@
+{
+  "Status": 3,
+  "TC": false,
+  "RD": true,
+  "RA": true,
+  "AD": false,
+  "CD": false,
+  "Question": [
+    {
+      "name": "nonexistent-zz9-test.com",
+      "type": 16
+    }
+  ],
+  "Authority": [
+    {
+      "name": "com",
+      "type": 6,
+      "TTL": 257,
+      "data": "a.gtld-servers.net. nstld.verisign-grs.com. 1786283109 1800 900 604800 900"
+    }
+  ]
+}
