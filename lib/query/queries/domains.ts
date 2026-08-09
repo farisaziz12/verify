@@ -27,6 +27,23 @@ export function domainsQueryOptions() {
   })
 }
 
+/** A domain plus the DNS record its owner needs to publish. */
+export interface DomainDetail {
+  domain: Domain
+  record: { name: string; value: string }
+}
+
+export function domainQueryOptions(id: string) {
+  return queryOptions({
+    queryKey: queryKeys.domains.detail(id),
+    queryFn: () => apiFetch<DomainDetail>(`/api/domains/${id}`),
+    refetchInterval: (query) =>
+      hasWorkInFlight(query.state.data ? [query.state.data.domain] : undefined)
+        ? PENDING_POLL_MS
+        : false,
+  })
+}
+
 /**
  * Whether any domain could still change on its own, which is the only reason to poll.
  *
