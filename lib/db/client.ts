@@ -9,9 +9,16 @@ function create() {
 
 type Db = ReturnType<typeof create>
 
-const globalForDb = globalThis as typeof globalThis & { __verifyDb?: Db }
+/**
+ * One client per process, kept on `globalThis` so dev hot-reload reuses it instead of opening
+ * a new Neon connection on every edit. `var` is required here: it is the only declaration
+ * form that augments `globalThis`.
+ */
+declare global {
+  var __verifyDb: Db | undefined
+}
 
 export function getDb(): Db {
-  globalForDb.__verifyDb ??= create()
-  return globalForDb.__verifyDb
+  globalThis.__verifyDb ??= create()
+  return globalThis.__verifyDb
 }

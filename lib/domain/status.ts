@@ -1,17 +1,23 @@
-import type { DomainStatus } from '@/lib/db/schema'
+import type { Domain } from '@/lib/db/schema'
 
-export type StatusTone = 'verified' | 'attention' | 'pending' | 'inactive'
+/**
+ * Lifecycle questions, derived from `status` so there is nothing to keep in sync.
+ *
+ * `machine.ts` does not use these: it is what decides status, so it matches on the literals.
+ */
+type HasStatus = Pick<Domain, 'status'>
 
-export interface StatusPresentation {
-  word: string
-  tone: StatusTone
+/** Proven. Nothing further is required of the user. */
+export function isVerified({ status }: HasStatus): boolean {
+  return status === 'verified'
 }
 
-/** How each lifecycle state reads to a user. */
-export const STATUS_PRESENTATION = {
-  pending: { word: 'Pending', tone: 'pending' },
-  verified: { word: 'Verified', tone: 'verified' },
-  expired: { word: 'Expired', tone: 'inactive' },
-  temporarily_failed: { word: 'Record missing', tone: 'attention' },
-  revoked: { word: 'Revoked', tone: 'inactive' },
-} as const satisfies Record<DomainStatus, StatusPresentation>
+/** Still being worked on — the only state anything re-checks on its own. */
+export function isPending({ status }: HasStatus): boolean {
+  return status === 'pending'
+}
+
+/** Nothing will change on its own again, whether it ended well or not. */
+export function isSettled(domain: HasStatus): boolean {
+  return !isPending(domain)
+}

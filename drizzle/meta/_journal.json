@@ -15,6 +15,13 @@
       "when": 1786191424501,
       "tag": "0001_checks",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786304935366,
+      "tag": "0002_drop_expires_at",
+      "breakpoints": true
     }
   ]
 }

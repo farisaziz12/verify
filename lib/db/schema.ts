@@ -1,7 +1,9 @@
-import { relations, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import { index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { uuidv7 } from 'uuidv7'
 import type { Lookup } from '../dns/types'
+import type { DiagnosisCode } from '../verification/codes'
+import type { DiagnosisEvidence } from '../verification/diagnose'
 
 export const domainStatus = pgEnum('domain_status', [
   'pending',
@@ -24,7 +26,6 @@ export const domains = pgTable(
     consecutiveFailures: integer('consecutive_failures').notNull().default(0),
     nextCheckAt: timestamp('next_check_at', { withTimezone: true }).notNull(),
     claimedAt: timestamp('claimed_at', { withTimezone: true }).notNull().defaultNow(),
-    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     verifiedAt: timestamp('verified_at', { withTimezone: true }),
     failingSince: timestamp('failing_since', { withTimezone: true }),
     lastCheckedAt: timestamp('last_checked_at', { withTimezone: true }),
@@ -56,8 +57,8 @@ export const checks = pgTable(
     /** The query trail, in the order it was walked. */
     lookups: jsonb('lookups').$type<Lookup[]>().notNull(),
     verdict: checkVerdict('verdict').notNull(),
-    diagnosisCode: text('diagnosis_code').notNull(),
-    evidence: jsonb('evidence'),
+    diagnosisCode: text('diagnosis_code').$type<DiagnosisCode>().notNull(),
+    evidence: jsonb('evidence').$type<DiagnosisEvidence>(),
     /** Advisory only. */
     notes: jsonb('notes').$type<string[]>(),
   },
@@ -68,11 +69,3 @@ export type Domain = typeof domains.$inferSelect
 export type Check = typeof checks.$inferSelect
 
 export type DomainStatus = (typeof domainStatus.enumValues)[number]
-
-export const domainsRelations = relations(domains, ({ many }) => ({
-  checks: many(checks),
-}))
-
-export const checksRelations = relations(checks, ({ one }) => ({
-  domain: one(domains, { fields: [checks.domainId], references: [domains.id] }),
-}))
