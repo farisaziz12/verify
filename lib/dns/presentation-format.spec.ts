@@ -58,8 +58,9 @@ describe('against captured live responses', () => {
    * A chunk-joining bug cannot survive this.
    */
   it('decodes a multi-chunk DKIM key to exactly what Google returns', () => {
-    const cloudflare = txtData(cloudflareMultiChunk)[0] as string
-    const google = txtData(googleMultiChunk)[0] as string
+    const [cloudflare] = txtData(cloudflareMultiChunk)
+    const [google] = txtData(googleMultiChunk)
+    if (!cloudflare || !google) throw new Error('fixtures must both hold a TXT record')
 
     expect(cloudflare).toContain('" "')
     expect(google).not.toContain('"')

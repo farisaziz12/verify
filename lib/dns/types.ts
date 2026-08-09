@@ -1,9 +1,11 @@
+export type QueryFailureReason = 'timeout' | 'servfail' | 'network' | 'malformed'
+
 /** DNS query results as values. */
 export type QueryOutcome =
   | { kind: 'answered'; records: TxtRecord[]; ttl: number }
   | { kind: 'nodata'; negativeTtl: number | null }
   | { kind: 'nxdomain'; negativeTtl: number | null }
-  | { kind: 'error'; reason: 'timeout' | 'servfail' | 'network' | 'malformed' }
+  | { kind: 'error'; reason: QueryFailureReason }
 
 export interface TxtRecord {
   value: string

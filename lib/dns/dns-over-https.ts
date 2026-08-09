@@ -1,7 +1,9 @@
+import { z } from 'zod'
+import { SECOND } from '@/lib/time'
 import { decodeCloudflareTxt, decodeGoogleTxt } from './presentation-format'
 import type { QueryOutcome, QueryResult, RecordType, Resolver } from './types'
 
-const QUERY_TIMEOUT_MS = 3000
+const QUERY_TIMEOUT_MS = 3 * SECOND
 
 const TYPE_TXT = 16
 const TYPE_SOA = 6
@@ -9,18 +11,24 @@ const TYPE_SOA = 6
 const STATUS_NOERROR = 0
 const STATUS_NXDOMAIN = 3
 
-interface DnsJsonRecord {
-  name: string
-  type: number
-  TTL?: number
-  data: string
-}
+/**
+ * The subset of the DoH JSON body this adapter reads. Unlisted fields (`TC`, `RD`, `Comment`)
+ * are dropped. `Answer` and `Authority` are optional; a body missing `Status` is malformed.
+ */
+const dnsJsonRecordSchema = z.object({
+  name: z.string(),
+  type: z.number(),
+  TTL: z.number().optional(),
+  data: z.string(),
+})
 
-interface DnsJsonResponse {
-  Status: number
-  Answer?: DnsJsonRecord[]
-  Authority?: DnsJsonRecord[]
-}
+const dnsJsonResponseSchema = z.object({
+  Status: z.number(),
+  Answer: z.array(dnsJsonRecordSchema).optional(),
+  Authority: z.array(dnsJsonRecordSchema).optional(),
+})
+
+type DnsJsonResponse = z.infer<typeof dnsJsonResponseSchema>
 
 /**
  * Turns a DoH JSON body into a `QueryOutcome`.
@@ -69,14 +77,17 @@ function createResolver(
     async query(recordName: string, type: RecordType): Promise<QueryResult> {
       const url = `${endpoint}?name=${encodeURIComponent(recordName)}&type=${type}`
 
-      // The only try/catch around DNS in the codebase (invariant 3). Every `kind: 'error'`
-      // value in the system is born here.
+      // The only try/catch around DNS in the codebase: a thrown fetch becomes a value here
+      // and nowhere else, which is what keeps DNS outcomes values rather than exceptions.
+      // (`classifyResponse` also returns `kind: 'error'`, for answers that arrived but were
+      // unusable — those never involved an exception.)
       try {
         const response = await fetch(url, {
           // Mandatory for Cloudflare, which returns 400 with an empty body without it.
           headers: { accept: 'application/dns-json' },
-          // Next patches fetch with caching; a verification product must never read a
-          // remembered answer (DECISIONS: no DoH response caching).
+          // Explicit, not defensive: Next stopped caching fetch by default in 15, but a
+          // verification product must never read a remembered answer, and that requirement
+          // should not rest on a framework default that has already changed once.
           cache: 'no-store',
           signal: AbortSignal.timeout(QUERY_TIMEOUT_MS),
         })
@@ -86,8 +97,12 @@ function createResolver(
           return { resolver: name, outcome: { kind: 'error', reason: 'malformed' } }
         }
 
-        const body = (await response.json()) as DnsJsonResponse
-        return { resolver: name, outcome: classifyResponse(body, decode) }
+        const body = dnsJsonResponseSchema.safeParse(await response.json())
+        if (!body.success) {
+          return { resolver: name, outcome: { kind: 'error', reason: 'malformed' } }
+        }
+
+        return { resolver: name, outcome: classifyResponse(body.data, decode) }
       } catch (error) {
         return { resolver: name, outcome: { kind: 'error', reason: failureReason(error) } }
       }

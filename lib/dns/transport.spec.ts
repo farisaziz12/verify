@@ -22,7 +22,7 @@ describe('the request the adapter sends', () => {
     await cloudflareResolver.query('_claim.example.com', 'TXT')
 
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit]
-    expect((init.headers as Record<string, string>).accept).toBe('application/dns-json')
+    expect(new Headers(init.headers).get('accept')).toBe('application/dns-json')
   })
 
   // Next patches fetch with its own cache. A remembered DNS answer would tell a user their

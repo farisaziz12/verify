@@ -1,14 +1,10 @@
 import type { QueryResult, RecordType, Resolver } from './types'
 
 /**
- * Queries `primary`, falling back to `backup` only when the primary fails to answer.
+ * Queries `primary`, falling back to `backup` on `kind: 'error'` and nothing else.
  *
- * Failover is triggered by `kind: 'error'` and nothing else. `nxdomain` and `nodata` are real
- * answers — retrying them against a second resolver would be seeking a second opinion, which
- * is consensus, and consensus is deliberately out of scope (DECISIONS D2).
- *
- * The result reports whichever adapter actually answered, so the query trail can show that
- * the backup was used.
+ * `nxdomain` and `nodata` are answers, not failures, so they are never retried.
+ * The returned `resolver` names whichever adapter answered.
  */
 export function withFailover(primary: Resolver, backup: Resolver): Resolver {
   return {

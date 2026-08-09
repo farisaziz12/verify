@@ -14,8 +14,10 @@ import goNxdomain from './__fixtures__/google-nxdomain.json'
 import { classifyResponse } from './dns-over-https'
 import { decodeCloudflareTxt, decodeGoogleTxt } from './presentation-format'
 
-const classifyAsCloudflare = (body: unknown) => classifyResponse(body as never, decodeCloudflareTxt)
-const classifyAsGoogle = (body: unknown) => classifyResponse(body as never, decodeGoogleTxt)
+type DnsJsonBody = Parameters<typeof classifyResponse>[0]
+
+const classifyAsCloudflare = (body: DnsJsonBody) => classifyResponse(body, decodeCloudflareTxt)
+const classifyAsGoogle = (body: DnsJsonBody) => classifyResponse(body, decodeGoogleTxt)
 
 describe('classifyResponse — answered', () => {
   it('returns every TXT record, decoded', () => {
