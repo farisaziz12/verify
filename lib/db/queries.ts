@@ -38,6 +38,17 @@ export async function getDomain(id: string): Promise<Domain | null> {
   return domain ?? null
 }
 
+/**
+ * Removes a domain and, by cascade, every check belonging to it.
+ *
+ * Null when no domain has that id. The `checks.domain_id` foreign key is declared
+ * `on delete cascade`, so the timeline goes with it in the same statement.
+ */
+export async function deleteDomain(id: string): Promise<Domain | null> {
+  const [deleted] = await getDb().delete(domains).where(eq(domains.id, id)).returning()
+  return deleted ?? null
+}
+
 /** Null when the name is already claimed. */
 export async function createDomain(name: string): Promise<Domain | null> {
   const now = new Date()
@@ -80,6 +91,9 @@ export async function claimDueCheck(id: string, leaseUntil: Date): Promise<Domai
 
   return claimed ?? null
 }
+
+/** How many checks a timeline shows. Shared by the route and the server-side prefetch. */
+export const TIMELINE_LENGTH = 5
 
 /** Newest first. Each row carries its whole `lookups` trail, so `limit` is required. */
 export function listChecks(domainId: string, limit: number): Promise<Check[]> {
