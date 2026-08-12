@@ -62,10 +62,18 @@ export const domainListSchema = z.array(
   }),
 )
 
+/**
+ * The detail payload.
+ *
+ * `latestCheck` falls back to null rather than failing the parse. A check row this client
+ * cannot read — one written by a newer deploy, or corrupted — must not cost the user the
+ * domain name and the record they came here to copy. They see "Not checked yet" and the page
+ * still works.
+ */
 export const domainDetailSchema = z.object({
   domain: domainSchema,
   record: recordSchema,
-  latestCheck: checkSchema.nullable(),
+  latestCheck: checkSchema.nullable().catch(null),
 })
 
 /**
@@ -90,4 +98,18 @@ export const checkResultSchema = z.discriminatedUnion('checked', [
 
 export const claimResultSchema = z.object({ domain: domainSchema, record: recordSchema })
 
-export const checkListSchema = z.array(checkSchema)
+/** What a removal returns: the row that was deleted, so the caller can name it. */
+export const deleteResultSchema = z.object({ domain: domainSchema })
+
+/**
+ * The timeline, with unreadable rows dropped rather than rejected.
+ *
+ * Same reasoning as `domainDetailSchema`: one row this client cannot parse costs that row,
+ * not the whole history.
+ */
+export const checkListSchema = z.array(z.unknown()).transform((rows) =>
+  rows.flatMap((row) => {
+    const parsed = checkSchema.safeParse(row)
+    return parsed.success ? [parsed.data] : []
+  }),
+)
