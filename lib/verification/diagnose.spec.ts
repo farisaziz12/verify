@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { QueryOutcome } from '@/lib/dns/types'
-import { DIAGNOSES, DIAGNOSIS_CODES } from './codes'
+import { DIAGNOSES, DIAGNOSIS_CODES, describeCheckStatus, hasStaleRecord, stageFor } from './codes'
 import { diagnose } from './diagnose'
 
 const TOKEN = 'verify=abcdefghijklmnopqrstuvwxyz'
@@ -101,7 +101,8 @@ describe('the negative-cache advisory', () => {
   it('explains a long-cached absence on a young claim', () => {
     const diagnosis = run(nodata(LONG_TTL), null, 60_000)
     expect(diagnosis.notes?.[0]).toMatch(/may remember this record's absence/)
-    expect(diagnosis.notes?.[0]).toContain('1440 minutes')
+    // Coarsened deliberately: 86,400s is 24 hours, and "1440 minutes" is arithmetic.
+    expect(diagnosis.notes?.[0]).toContain('24 hours')
   })
 
   it('attaches to nxdomain too', () => {
@@ -147,5 +148,81 @@ describe('the registry', () => {
     }
     expect(DIAGNOSES.VERIFIED_OK.action).toBeNull()
     expect(DIAGNOSES.DNS_UNREACHABLE.action).toBeNull()
+  })
+})
+
+describe('a verified domain whose record later stops matching', () => {
+  it('is flagged stale when the newest check failed', () => {
+    expect(hasStaleRecord('verified', 'TOKEN_MISMATCH')).toBe(true)
+    expect(hasStaleRecord('verified', 'RECORD_NAME_MISSING')).toBe(true)
+  })
+
+  it('is not flagged when we simply could not look', () => {
+    expect(hasStaleRecord('verified', 'DNS_UNREACHABLE')).toBe(false)
+  })
+
+  it('is not flagged while the record still matches, or before any check', () => {
+    expect(hasStaleRecord('verified', 'VERIFIED_OK')).toBe(false)
+    expect(hasStaleRecord('verified', null)).toBe(false)
+  })
+
+  it('does not apply to a domain that was never verified', () => {
+    expect(hasStaleRecord('pending', 'TOKEN_MISMATCH')).toBe(false)
+  })
+
+  it('keeps the progress strip complete, because setup did happen', () => {
+    expect(stageFor('verified', 'TOKEN_MISMATCH')).toBe(3)
+    expect(stageFor('verified', null)).toBe(3)
+  })
+
+  it('still walks a pending domain through the stages', () => {
+    expect(stageFor('pending', null)).toBe(1)
+    expect(stageFor('pending', 'RECORD_NAME_MISSING')).toBe(1)
+    expect(stageFor('pending', 'TOKEN_MISMATCH')).toBe(2)
+    expect(stageFor('pending', 'VERIFIED_OK')).toBe(3)
+  })
+})
+
+describe('describeCheckStatus', () => {
+  it('says nothing has happened before the first check', () => {
+    expect(describeCheckStatus('pending', null)).toEqual({
+      headline: 'Not checked yet',
+      tone: 'inactive',
+      summary: null,
+      action: null,
+      showsVerified: false,
+    })
+  })
+
+  it('shows the verified treatment only when verified and the record still matches', () => {
+    expect(describeCheckStatus('verified', 'VERIFIED_OK').showsVerified).toBe(true)
+    expect(describeCheckStatus('verified', 'TOKEN_MISMATCH').showsVerified).toBe(false)
+    expect(describeCheckStatus('pending', 'VERIFIED_OK').showsVerified).toBe(false)
+  })
+
+  it('renames the headline for a verified domain whose record broke, keeping the fix', () => {
+    const view = describeCheckStatus('verified', 'TOKEN_MISMATCH')
+    expect(view.headline).toBe('Verified, but the record has changed')
+    expect(view.action).toBe(DIAGNOSES.TOKEN_MISMATCH.action)
+    expect(view.tone).toBe(DIAGNOSES.TOKEN_MISMATCH.tone)
+  })
+
+  it('passes a pending diagnosis through unchanged', () => {
+    const view = describeCheckStatus('pending', 'RECORD_NAME_MISSING')
+    expect(view.headline).toBe(DIAGNOSES.RECORD_NAME_MISSING.headline)
+    expect(view.summary).toBe(DIAGNOSES.RECORD_NAME_MISSING.summary)
+  })
+
+  it('leaves a verified domain alone when a query could not complete', () => {
+    const view = describeCheckStatus('verified', 'DNS_UNREACHABLE')
+    expect(view.showsVerified).toBe(true)
+    expect(view.headline).toBe('Verified')
+    expect(view.action).toBeNull()
+  })
+
+  it('still reports an incomplete query on a domain that was never verified', () => {
+    const view = describeCheckStatus('pending', 'DNS_UNREACHABLE')
+    expect(view.showsVerified).toBe(false)
+    expect(view.headline).toBe("Couldn't check")
   })
 })

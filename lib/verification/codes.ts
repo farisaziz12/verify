@@ -127,12 +127,86 @@ export function describeDomain(
 }
 
 /**
+ * Everything the status card renders, decided once.
+ *
+ * Four visual decisions follow from the same pair of facts, so they are resolved here rather
+ * than re-derived at each use site.
+ */
+export interface CheckStatusView {
+  headline: string
+  /** Colours the dot. Ignored when `showsVerified`, which renders a tick instead. */
+  tone: StatusTone
+  /** The sentence behind the info tip, or null before the first check. */
+  summary: string | null
+  /** The single next thing to do, or null when there is nothing. */
+  action: string | null
+  /** Render the verified treatment: tick, green ring, and the last-verified line. */
+  showsVerified: boolean
+}
+
+export function describeCheckStatus(
+  status: DomainStatus,
+  code: DiagnosisCode | null,
+): CheckStatusView {
+  const verified = status === 'verified'
+
+  if (!code) {
+    return {
+      headline: 'Not checked yet',
+      tone: 'inactive',
+      summary: null,
+      action: null,
+      showsVerified: false,
+    }
+  }
+
+  const { headline, tone, summary, action, verdict } = DIAGNOSES[code]
+
+  // A query that did not complete is not news about a verified domain, so it does not get to
+  // change what the card says.
+  if (verified && verdict === 'indeterminate') {
+    const ok = DIAGNOSES.VERIFIED_OK
+    return {
+      headline: ok.headline,
+      tone: ok.tone,
+      summary: ok.summary,
+      action: null,
+      showsVerified: true,
+    }
+  }
+
+  if (hasStaleRecord(status, code)) {
+    return {
+      headline: 'Verified, but the record has changed',
+      tone,
+      summary,
+      action,
+      showsVerified: false,
+    }
+  }
+
+  return { headline, tone, summary, action, showsVerified: verified }
+}
+
+/**
+ * A domain that passed once and whose most recent check disagrees.
+ *
+ * `indeterminate` does not count: a query we could not complete says nothing about the record,
+ * so it must not make a verified domain look broken.
+ */
+export function hasStaleRecord(status: DomainStatus, code: DiagnosisCode | null): boolean {
+  return status === 'verified' && code !== null && DIAGNOSES[code].verdict === 'fail'
+}
+
+/**
  * Which of the three setup steps the user has reached.
  *
  * Finding any TXT record at the right name proves step 1 is done, even when the value is
  * wrong — so a mismatch is further along than an absence.
  */
-export function stageFor(code: DiagnosisCode | null): 1 | 2 | 3 {
+export function stageFor(status: DomainStatus, code: DiagnosisCode | null): 1 | 2 | 3 {
+  // Setup is done once a domain is verified, whatever a later check found.
+  if (status === 'verified') return 3
   if (code === 'VERIFIED_OK') return 3
   if (code === 'TOKEN_MISMATCH' || code === 'ZONE_NAME_APPENDED') return 2
   return 1
