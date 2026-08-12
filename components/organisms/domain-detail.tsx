@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { Button } from '@/components/atoms/button'
 import { Card } from '@/components/atoms/card'
+import { ErrorBoundary } from '@/components/molecules/error-boundary'
 import { ProgressSteps } from '@/components/molecules/progress-steps'
 import { StatusIndicator } from '@/components/molecules/status-indicator'
 import { Activity } from '@/components/organisms/activity'
@@ -11,9 +12,10 @@ import { CheckStatus } from '@/components/organisms/check-status'
 import { ProviderSetup } from '@/components/organisms/provider-setup'
 import { RecordCard } from '@/components/organisms/record-card'
 import { RecordSummary } from '@/components/organisms/record-summary'
+import { RemoveDomain } from '@/components/organisms/remove-domain'
 import { isVerified } from '@/lib/domain/status'
 import { domainQueryOptions } from '@/lib/query/queries/domains'
-import { describeDomain, stageFor } from '@/lib/verification/codes'
+import { describeDomain, hasStaleRecord, stageFor } from '@/lib/verification/codes'
 
 export function DomainDetail({ id }: { id: string }) {
   const { data, isPending, isError, error } = useQuery(domainQueryOptions(id))
@@ -28,6 +30,7 @@ export function DomainDetail({ id }: { id: string }) {
   const { domain, record, latestCheck } = data
   const { diagnosisCode = null } = latestCheck ?? {}
   const description = describeDomain(domain.status, diagnosisCode)
+  const isStale = hasStaleRecord(domain.status, diagnosisCode)
 
   return (
     <div className="flex flex-col gap-12">
@@ -41,22 +44,32 @@ export function DomainDetail({ id }: { id: string }) {
         </div>
       </div>
 
-      <ProgressSteps stage={stageFor(diagnosisCode)} tone={description.tone} />
+      <ProgressSteps stage={stageFor(domain.status, diagnosisCode)} tone={description.tone} />
 
-      <CheckStatus domain={domain} latestCheck={latestCheck} />
+      <ErrorBoundary label="This domain's status">
+        <CheckStatus domain={domain} latestCheck={latestCheck} />
+      </ErrorBoundary>
 
-      {/* Once verified there is nothing left to publish, so the instructions collapse to a
-          single line confirming what is in place. */}
-      {isVerified(domain) ? (
-        <RecordSummary name={record.name} value={record.value} />
-      ) : (
-        <>
-          <RecordCard name={record.name} value={record.value} />
-          <ProviderSetup recordName={record.name} />
-        </>
-      )}
+      {/* The instructions collapse to one line only while the record is actually in place.
+          A verified domain whose record has since changed needs them back. */}
+      <ErrorBoundary label="The record to publish">
+        {isVerified(domain) && !isStale ? (
+          <RecordSummary name={record.name} value={record.value} />
+        ) : (
+          <>
+            <RecordCard name={record.name} value={record.value} />
+            <ProviderSetup recordName={record.name} />
+          </>
+        )}
+      </ErrorBoundary>
 
-      <Activity domainId={id} />
+      <ErrorBoundary label="The check history">
+        <Activity domainId={id} />
+      </ErrorBoundary>
+
+      <div className="flex items-center">
+        <RemoveDomain domain={domain} />
+      </div>
     </div>
   )
 }
