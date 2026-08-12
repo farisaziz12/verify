@@ -1,10 +1,10 @@
 import { z } from 'zod'
 
-/** A non-2xx response, carrying the field the API blamed so a form can point at it. */
+/** A non-2xx response. */
 export class ApiRequestError extends Error {
   readonly status: number
   readonly field: string | undefined
-  /** The envelope's `meta`, which carries things like `retryAfterSeconds` on a 429. */
+  /** The envelope's `meta` — `retryAfterSeconds` on a 429, for instance. */
   readonly meta: Record<string, unknown> | null
 
   constructor(
@@ -20,27 +20,13 @@ export class ApiRequestError extends Error {
   }
 }
 
-/** The envelope every route returns. `data` is validated separately, by the caller's schema. */
 const envelopeSchema = z.object({
   data: z.unknown(),
   error: z.object({ message: z.string(), field: z.string().optional() }).nullable(),
   meta: z.record(z.string(), z.unknown()).nullable(),
 })
 
-/**
- * Calls a route handler, unwraps the `{ data, error, meta }` envelope, and validates `data`
- * against the caller's schema.
- *
- * Validating rather than asserting means a server that changes shape fails here, naming the
- * field, instead of surfacing as `undefined` somewhere in a component. It is also what lets
- * timestamps come back as `Date` rather than the ISO strings JSON actually carries.
- *
- * Resolves an absolute origin when running on the server so the same call works during
- * prefetch and in the browser — one queryFn, not two implementations of the same read.
- *
- * @throws {ApiRequestError} on a non-2xx response, an unreachable server, or a body that
- * does not match `schema`.
- */
+/** Unwraps the envelope and validates `data`; throws `ApiRequestError` on non-2xx, no server, or a shape mismatch. */
 export async function apiFetch<T>(
   path: string,
   schema: z.ZodType<T>,
@@ -85,7 +71,7 @@ export async function apiFetch<T>(
   return data.data
 }
 
-/** Empty in the browser so requests stay relative; absolute on the server, which has no origin. */
+/** Empty in the browser; absolute on the server. */
 function origin(): string {
   if (typeof window !== 'undefined') return ''
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`

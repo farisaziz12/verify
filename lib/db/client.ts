@@ -9,11 +9,7 @@ function create() {
 
 type Db = ReturnType<typeof create>
 
-/**
- * One client per process, kept on `globalThis` so dev hot-reload reuses it instead of opening
- * a new Neon connection on every edit. `var` is required here: it is the only declaration
- * form that augments `globalThis`.
- */
+/** One client per process. `var` is the only declaration form that augments `globalThis`. */
 declare global {
   var __verifyDb: Db | undefined
 }

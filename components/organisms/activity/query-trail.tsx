@@ -1,6 +1,6 @@
 import type { Lookup, QueryOutcome } from '@/lib/dns/types'
 
-/** Every DNS query this check ran: the name asked, the answer, and how long it took. */
+/** Every DNS query this check ran. */
 export function QueryTrail({ lookups }: { lookups: Lookup[] }) {
   return (
     <dl className="text-hint grid grid-cols-[1fr_auto] gap-x-3 gap-y-1 font-mono sm:gap-x-4">
@@ -21,7 +21,6 @@ export function QueryTrail({ lookups }: { lookups: Lookup[] }) {
   )
 }
 
-/** One line describing an outcome, in the vocabulary DNS itself uses. */
 function summarise(outcome: QueryOutcome): string {
   switch (outcome.kind) {
     case 'answered':

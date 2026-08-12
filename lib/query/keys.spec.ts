@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { queryKeys } from './keys'
 
-/** True when `key` starts with every segment of `prefix`, which is how TanStack matches. */
 function hasPrefix(key: readonly unknown[], prefix: readonly unknown[]): boolean {
   return prefix.every((segment, i) => key[i] === segment)
 }

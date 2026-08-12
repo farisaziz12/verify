@@ -12,11 +12,9 @@ import { defaultResolver } from '@/lib/dns'
 import { MINUTE, SECOND } from '@/lib/time'
 import { runCheck } from '@/lib/verification/engine'
 
-/** A person may ask for a check 5 times per 5 minutes. Automatic checks are throttled by being due. */
 const MANUAL_LIMIT = 5
 const MANUAL_WINDOW_MS = 5 * MINUTE
 
-/** How long a claimed check is held before another request may retry it. */
 const CLAIM_LEASE_MS = MINUTE
 
 const paramsSchema = z.object({ id: z.uuid('That is not a valid domain id.') })
@@ -48,19 +46,13 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     : runManualCheck(parsed.data.id)
 }
 
-/**
- * A check the user asked for.
- *
- * Runs whether or not the domain was due, within the limit that stops a held-down button
- * from becoming a DNS flood.
- */
+/** Runs whether or not the domain is due, within the manual rate limit. */
 async function runManualCheck(id: string) {
   const domain = await getDomain(id)
   if (!domain) return fail(404, 'That domain does not exist.')
 
   const recent = await countManualChecksSince(domain.id, new Date(Date.now() - MANUAL_WINDOW_MS))
   if (recent.total >= MANUAL_LIMIT) {
-    // A slot frees up one window after the oldest check inside it, so that is when to retry.
     const retryAfterSeconds = recent.oldestAt
       ? Math.max(1, Math.ceil((recent.oldestAt.getTime() + MANUAL_WINDOW_MS - Date.now()) / 1000))
       : MANUAL_WINDOW_MS / SECOND
@@ -86,21 +78,12 @@ async function runManualCheck(id: string) {
   )
 }
 
-/**
- * A check the page ran on the user's behalf while they watch.
- *
- * Needs no rate limit because it only runs when the domain is actually due: `next_check_at`
- * is the throttle, and it widens as a claim ages. Not due means no DNS query and no new row.
- *
- * Both answers carry `nextCheckAt` so the caller can wait exactly that long instead of
- * polling on a fixed interval and being turned away most of the time.
- */
+/** No rate limit: `next_check_at` is the throttle — not due means no DNS query and no new row. */
 async function runAutomaticCheck(id: string) {
   const claimed = await claimDueCheck(id, new Date(Date.now() + CLAIM_LEASE_MS))
 
   if (!claimed) {
-    // Not due, or another request holds the lease. Either way its `next_check_at` is when
-    // to come back, which costs a read only on the path that did no DNS work.
+    // Not due, or another request holds the lease.
     const domain = await getDomain(id)
     if (!domain) return fail(404, 'That domain does not exist.')
 

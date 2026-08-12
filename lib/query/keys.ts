@@ -1,10 +1,4 @@
-/**
- * Every key is a prefix-extension of its parent, so invalidating `domains.all()` reaches the
- * list, every detail, and every timeline.
- *
- * `autoCheck` sits outside `domains` on purpose: it invalidates that subtree when a check
- * changes something, and a key underneath it would invalidate itself and spin.
- */
+/** Every key extends its parent's prefix. `autoCheck` stays outside `domains`: it invalidates that subtree. */
 export const queryKeys = {
   domains: {
     all: () => ['domains'] as const,

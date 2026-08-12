@@ -1,7 +1,6 @@
 interface CheckButtonProps {
   onCheck: () => void
   isPending: boolean
-  /** Counted down from the server's rate-limit response; null when a check is allowed. */
   retryAfterSeconds: number | null
 }
 

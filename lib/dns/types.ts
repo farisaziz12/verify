@@ -1,6 +1,5 @@
 export type QueryFailureReason = 'timeout' | 'servfail' | 'network' | 'malformed'
 
-/** DNS query results as values. */
 export type QueryOutcome =
   | { kind: 'answered'; records: TxtRecord[]; ttl: number }
   | { kind: 'nodata'; negativeTtl: number | null }
@@ -13,14 +12,9 @@ export interface TxtRecord {
 
 export type RecordType = 'TXT' | 'NS'
 
-/**
- * An outcome together with the adapter that produced it.
- *
- * The resolver is reported per query rather than read from `Resolver.name` because a
- * composed failover resolver answers as one of two adapters, and the trail has to say which.
- */
 export interface QueryResult {
   outcome: QueryOutcome
+  /** The adapter that actually answered, not necessarily the one queried. */
   resolver: string
 }
 
@@ -32,9 +26,7 @@ export interface Resolver {
 /** One query, kept for the user-visible trail. */
 export interface Lookup {
   name: string
-  /** Why this query was made. */
   purpose: string
-  /** Which adapter answered. */
   resolver: string
   outcome: QueryOutcome
   latencyMs: number

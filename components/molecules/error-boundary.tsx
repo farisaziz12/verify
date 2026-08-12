@@ -5,9 +5,7 @@ import { Card } from '@/components/atoms/card'
 
 interface ErrorBoundaryProps {
   children: ReactNode
-  /** What this section is, in the sentence "… could not be shown." */
   label: string
-  /** Replaces the default card, for seams whose shape a card would break — a table row. */
   fallback?: ReactNode
 }
 
@@ -15,12 +13,7 @@ interface ErrorBoundaryState {
   hasError: boolean
 }
 
-/**
- * Keeps a thrown render inside one section of the page.
- *
- * A class because `getDerivedStateFromError` has no hook equivalent. Catches render errors
- * only — a rejected query is the query layer's to report, not this.
- */
+/** Keeps a thrown render inside one section of the page. */
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   state: ErrorBoundaryState = { hasError: false }
 

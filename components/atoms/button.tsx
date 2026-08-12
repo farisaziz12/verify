@@ -22,7 +22,6 @@ const SIZE = {
 interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'> {
   variant?: Variant
   size?: Size
-  /** Render the child element with these styles. */
   asChild?: boolean
 }
 
@@ -36,7 +35,6 @@ export function Button({
   const Root = asChild ? Slot.Root : 'button'
   return (
     <Root
-      // Only a real <button> takes `type`; a slotted child may be an anchor, which does not.
       type={asChild ? type : (type ?? 'button')}
       className={classNames(
         'rounded-control text-ui inline-flex cursor-pointer items-center justify-center transition-colors',

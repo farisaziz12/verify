@@ -8,14 +8,7 @@ import { queryKeys } from '@/lib/query/keys'
 
 type ListRow = { domain: Domain; latestDiagnosis: string | null }
 
-/**
- * Removes a domain. The list drops the row before the request returns, and puts it back if
- * the request fails.
- *
- * Does not navigate: the caller holds the removal open long enough to be read, then leaves.
- * The detail query is dropped rather than invalidated, because refetching an id that no
- * longer exists would replace the confirmation with a 404.
- */
+/** Removes a domain optimistically, rolling the list back on failure. Does not navigate. */
 export function useDeleteDomain(id: string) {
   const queryClient = useQueryClient()
 

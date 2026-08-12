@@ -15,19 +15,12 @@ import { SECOND } from '@/lib/time'
 /** How long the confirmation stays up before leaving for the list. */
 const CONFIRMATION_MS = 3 * SECOND
 
-/**
- * Removes a domain, behind a confirmation sized to the consequence.
- *
- * An unverified claim is a button pair. A verified one has to be dragged across a track: the
- * work it represents is already done, so undoing it should take a deliberate gesture rather
- * than a reflex click in the same place the cancel button was.
- */
+/** Removes a domain, behind a confirmation sized to the consequence. */
 export function RemoveDomain({ domain }: { domain: Domain }) {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const { mutate, isPending, isSuccess, isError, error } = useDeleteDomain(domain.id)
 
-  // The dialog holds the confirmation open on purpose, then leaves for the list.
   useEffect(() => {
     if (!isSuccess) return
     const timer = setTimeout(() => router.push('/'), CONFIRMATION_MS)
@@ -43,8 +36,6 @@ export function RemoveDomain({ domain }: { domain: Domain }) {
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="fixed inset-0 z-40 grid animate-[fade_140ms_ease-out] place-items-center bg-black/70 p-6" />
         <AlertDialog.Content
-          // Once the row is gone there is nothing to cancel, so the exits are removed rather
-          // than left to return the user to a domain that no longer exists.
           onEscapeKeyDown={(event) => isSuccess && event.preventDefault()}
           className="rounded-surface border-edge bg-card fixed top-1/2 left-1/2 z-50 w-[calc(100%-3rem)] max-w-110 -translate-x-1/2 -translate-y-1/2 animate-[rise_160ms_ease-out] border"
         >

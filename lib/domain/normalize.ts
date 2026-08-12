@@ -3,24 +3,9 @@ import { ASCII_HOSTNAME, MALFORMED_STRUCTURE, WWW_PREFIX } from './patterns'
 
 export type NormalizeResult = { ok: true; name: string } | { ok: false; error: string }
 
-/** Shared by every structural rejection, so the three of them cannot drift apart. */
 const MALFORMED = "Check the dots and hyphens — that isn't a valid domain"
 
-/**
- * Coerces user input into the canonical name we store and query DNS for.
- *
- * The order of the steps is the contract, because several of them would give a wrong
- * answer if reordered:
- *
- *   1. empty input
- *   2. extract the hostname — drops scheme, path, query, port, and the root dot
- *   3. strip `www.` — *before* registrability, since `www.co.uk` is itself registrable
- *   4. reject IP addresses
- *   5. reject a bare public suffix — *before* the missing-dot check, so `com` is reported
- *      as a suffix rather than told to try `com.com`
- *   6. reject a single label with no dot
- *   7. punycode, then reject malformed structure, then illegal characters
- */
+/** Step order is the contract: strip `www.` before registrability, public suffix before the missing-dot check. */
 export function normalizeDomain(raw: string): NormalizeResult {
   if (!raw.trim()) return { ok: false, error: 'Enter a domain' }
 

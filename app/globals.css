@@ -26,9 +26,7 @@
   --spacing-control-sm: 30px;
   --spacing-control: 32px;
   --spacing-control-lg: 36px;
-  /* Tooltip body — wide enough for two lines of hint copy, narrow enough to stay readable. */
   --spacing-tooltip: 280px;
-  /* Icon-button hit area for inline glyphs sitting on a text baseline. */
   --spacing-tip: 18px;
 
   --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.4);
@@ -46,7 +44,6 @@
   --color-edge-danger: #3a2a2a;
   --color-edge-danger-hover: #4a3030;
   --color-edge-tooltip: #2c2c2c;
-  /* The verified card and its check badge share a green-tinted ring. */
   --color-edge-verified: #2b3a31;
 
   --color-fg: #fff;
@@ -59,17 +56,14 @@
   --color-inverse-hover: #e8e8e8;
 
   --color-danger: #cf6b6b;
-  /* Fill behind a destructive control — a red so dark it reads as a surface. */
   --color-danger-surface: #1a1212;
   --color-danger-surface-hover: #221515;
-  /* The portion of a slide-to-confirm track already crossed. */
   --color-danger-track: rgb(207 107 107 / 0.1);
 
   --color-status-verified: #58a97a;
   --color-status-attention: #c99a4a;
   --color-status-pending: #7d9dc4;
   --color-status-inactive: #7c7c7c;
-  /* Fill behind the verified checkmark — a green so dark it reads as a surface. */
   --color-status-verified-surface: #121a16;
 
   --text-step: 11.5px;
@@ -78,7 +72,6 @@
   --text-section--line-height: 1.4;
 }
 
-/* Sweeps a highlight across a progress or scanning bar. */
 @keyframes scan {
   from {
     transform: translateX(-100%);
@@ -103,7 +96,6 @@
   }
 }
 
-/* Panels and confirmations arrive from just below, never from nowhere. */
 @keyframes rise {
   from {
     opacity: 0;
@@ -126,7 +118,6 @@
   }
 }
 
-/* Draws a check stroke on. Pairs with stroke-dasharray on the path. */
 @keyframes draw {
   from {
     stroke-dashoffset: 16;

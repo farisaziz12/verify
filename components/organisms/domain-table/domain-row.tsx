@@ -5,7 +5,6 @@ import { ROW } from '@/components/organisms/domain-table/columns'
 import type { DomainListRow } from '@/lib/db/queries'
 import { describeDomain } from '@/lib/verification/codes'
 
-/** One domain, linking to its detail screen. The whole row is the link target. */
 export function DomainRow({ domain, latestDiagnosis }: DomainListRow) {
   const { word, tone } = describeDomain(domain.status, latestDiagnosis)
 

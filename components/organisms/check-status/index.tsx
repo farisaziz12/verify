@@ -20,7 +20,6 @@ interface CheckStatusProps {
   latestCheck: Check | null
 }
 
-/** What the last check found, and the one action it implies. */
 export function CheckStatus({ domain, latestCheck }: CheckStatusProps) {
   const runCheck = useRunCheck(domain.id)
   const auto = useAutoCheck(domain)

@@ -13,16 +13,10 @@ export interface CheckOutcome {
 
 export interface RunCheckDeps {
   resolver: Resolver
-  /** Injected so a test can pin time without stubbing globals. */
   now?: () => Date
 }
 
-/**
- * Runs one check and returns the rows it implies. Writes nothing: the caller must persist
- * `check` and `transition` together.
- *
- * `trigger` is recorded, never branched on.
- */
+/** Writes nothing: the caller must persist `check` and `transition` together. */
 export async function runCheck(
   domain: Domain,
   trigger: CheckTrigger,
@@ -37,8 +31,6 @@ export async function runCheck(
 
   const primary = await query(deps.resolver, expectedName, 'the record you published', lookups)
 
-  // Only worth asking about the doubled name when the right name did not already answer:
-  // providers that append the zone produce `_claim.example.com.example.com`.
   const probe = matches(primary, expectedValue)
     ? null
     : await query(deps.resolver, probeName, 'probing for a provider-appended zone name', lookups)
@@ -68,7 +60,7 @@ export async function runCheck(
   }
 }
 
-/** Runs one lookup and appends it to the trail, whatever the outcome. */
+/** Appends to `trail` whatever the outcome. */
 async function query(
   resolver: Resolver,
   name: string,

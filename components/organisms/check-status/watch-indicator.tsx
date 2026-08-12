@@ -2,15 +2,12 @@ import { Countdown } from '@/components/molecules/countdown'
 import { classNames } from '@/lib/class-names'
 
 interface WatchIndicatorProps {
-  /** False once the domain has settled and nothing more will happen on its own. */
   isWatching: boolean
-  /** True while a DNS query is actually in flight. */
   isChecking: boolean
-  /** When the page will next ask, from `useAutoCheck`. Null until the first answer lands. */
   nextAskAt: Date | null
 }
 
-/** Whether a check is coming and when. Renders nothing once the domain has settled. */
+/** Whether a check is coming and when. */
 export function WatchIndicator({ isWatching, isChecking, nextAskAt }: WatchIndicatorProps) {
   if (!isWatching) return null
 

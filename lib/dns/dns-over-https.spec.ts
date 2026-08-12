@@ -55,7 +55,6 @@ describe('classifyResponse — answered', () => {
 })
 
 describe('classifyResponse — CNAME contamination', () => {
-  // www.github.com returns 23 answers: one CNAME plus 22 TXT.
   it('drops type 5 records from an otherwise normal answer', () => {
     for (const outcome of [
       classifyAsCloudflare(cfCnamePollution),
@@ -67,7 +66,6 @@ describe('classifyResponse — CNAME contamination', () => {
     }
   })
 
-  // A Status-3 response whose Answer holds a CNAME must still read as nxdomain, not answered.
   it('does not mistake a CNAME inside an NXDOMAIN for an answer', () => {
     const outcome = classifyAsCloudflare(cfCnameInNxdomain)
     expect(outcome.kind).toBe('nxdomain')
@@ -91,7 +89,6 @@ describe('classifyResponse — negative answers', () => {
     }
   })
 
-  // The two resolvers genuinely disagree here — 86400 vs 1800 for the same query.
   it('preserves each resolver’s own negative TTL rather than normalising it', () => {
     const fromCloudflare = classifyAsCloudflare(cfNodata)
     const fromGoogle = classifyAsGoogle(goNodata)

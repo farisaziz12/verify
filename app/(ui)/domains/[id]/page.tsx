@@ -18,7 +18,6 @@ export async function generateMetadata({
   return { title: domain ? `${domain.name} · Verify` : 'Not found · Verify' }
 }
 
-/** Seeds the cache from the tables directly, rather than fetching this app's own API. */
 export default async function DomainDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
 

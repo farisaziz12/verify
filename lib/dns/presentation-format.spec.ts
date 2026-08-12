@@ -27,8 +27,6 @@ describe('decodeCloudflareTxt', () => {
     expect(decodeCloudflareTxt('"caf\\233"')).toBe('café')
   })
 
-  // A chunk ending in an escaped quote contains the same `" "` that separates chunks, so a
-  // naive split on that sequence would cut in the wrong place.
   it('is not fooled by a chunk ending in an escaped quote', () => {
     expect(decodeCloudflareTxt('"ab\\"" "cd"')).toBe('ab"cd')
   })
@@ -52,11 +50,6 @@ describe('against captured live responses', () => {
     expect(txtData(googleAnswered).some((d) => d.startsWith('"'))).toBe(false)
   })
 
-  /**
-   * The strongest check available: two independent resolvers encode the same 415-byte DKIM
-   * key differently, and decoding Cloudflare's form must reproduce Google's byte for byte.
-   * A chunk-joining bug cannot survive this.
-   */
   it('decodes a multi-chunk DKIM key to exactly what Google returns', () => {
     const [cloudflare] = txtData(cloudflareMultiChunk)
     const [google] = txtData(googleMultiChunk)

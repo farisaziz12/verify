@@ -48,7 +48,6 @@ describe('each rung of the ladder', () => {
   it('2. the token at the doubled name is an appended zone', () => {
     const diagnosis = run(nodata(), answered(TOKEN))
     expect(diagnosis.code).toBe('ZONE_NAME_APPENDED')
-    // The value is right; the evidence is the pair of names, not the pair of values.
     expect(diagnosis.evidence).toEqual({ expected: EXPECTED_NAME, found: [PROBE_NAME] })
   })
 
@@ -79,7 +78,6 @@ describe('precedence — the order is the contract', () => {
     expect(run(answered(TOKEN), answered(TOKEN)).code).toBe('VERIFIED_OK')
   })
 
-  // The doubled-name fix is the real fix even when a stale value also sits at the right name.
   it('appended beats mismatch', () => {
     expect(run(answered('verify=stale'), answered(TOKEN)).code).toBe('ZONE_NAME_APPENDED')
   })
@@ -88,7 +86,6 @@ describe('precedence — the order is the contract', () => {
     expect(run(answered('verify=stale'), nxdomain()).code).toBe('TOKEN_MISMATCH')
   })
 
-  // A resolver failure on the probe must not turn a real primary answer into an error.
   it('a failed probe does not override what the primary told us', () => {
     expect(run(answered('verify=stale'), failed('servfail')).code).toBe('TOKEN_MISMATCH')
     expect(run(nodata(), failed('timeout')).code).toBe('RECORD_NOT_FOUND')
@@ -96,12 +93,11 @@ describe('precedence — the order is the contract', () => {
 })
 
 describe('the negative-cache advisory', () => {
-  const LONG_TTL = 86_400 // what Cloudflare actually returned for a NODATA in our fixtures
+  const LONG_TTL = 86_400
 
   it('explains a long-cached absence on a young claim', () => {
     const diagnosis = run(nodata(LONG_TTL), null, 60_000)
     expect(diagnosis.notes?.[0]).toMatch(/may remember this record's absence/)
-    // Coarsened deliberately: 86,400s is 24 hours, and "1440 minutes" is arithmetic.
     expect(diagnosis.notes?.[0]).toContain('24 hours')
   })
 

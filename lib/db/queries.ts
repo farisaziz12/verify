@@ -11,7 +11,7 @@ export interface DomainListRow {
   latestDiagnosis: DiagnosisCode | null
 }
 
-/** Every domain with its latest diagnosis, newest claim first. One query, not one per row. */
+/** Newest claim first. */
 export async function listDomains(): Promise<DomainListRow[]> {
   const db = getDb()
 
@@ -38,12 +38,7 @@ export async function getDomain(id: string): Promise<Domain | null> {
   return domain ?? null
 }
 
-/**
- * Removes a domain and, by cascade, every check belonging to it.
- *
- * Null when no domain has that id. The `checks.domain_id` foreign key is declared
- * `on delete cascade`, so the timeline goes with it in the same statement.
- */
+/** Null when no domain has that id. Its checks cascade. */
 export async function deleteDomain(id: string): Promise<Domain | null> {
   const [deleted] = await getDb().delete(domains).where(eq(domains.id, id)).returning()
   return deleted ?? null
@@ -76,12 +71,7 @@ export async function latestCheck(domainId: string): Promise<Check | null> {
   return check ?? null
 }
 
-/**
- * Null when the domain was not due, or when another request already holds the lease.
- *
- * Claiming sets `next_check_at` to `leaseUntil`; the caller must overwrite it with a real
- * next time. Test and set happen in one statement, so two racing callers cannot both win.
- */
+/** Null when not due or already leased. Sets `next_check_at` to `leaseUntil`; caller overwrites it. */
 export async function claimDueCheck(id: string, leaseUntil: Date): Promise<Domain | null> {
   const [claimed] = await getDb()
     .update(domains)
@@ -92,10 +82,9 @@ export async function claimDueCheck(id: string, leaseUntil: Date): Promise<Domai
   return claimed ?? null
 }
 
-/** How many checks a timeline shows. Shared by the route and the server-side prefetch. */
 export const TIMELINE_LENGTH = 5
 
-/** Newest first. Each row carries its whole `lookups` trail, so `limit` is required. */
+/** Newest first. */
 export function listChecks(domainId: string, limit: number): Promise<Check[]> {
   return getDb()
     .select()
@@ -105,7 +94,7 @@ export function listChecks(domainId: string, limit: number): Promise<Check[]> {
     .limit(limit)
 }
 
-/** Counts `trigger = 'manual'` only. `oldestAt` is null when the count is zero. */
+/** Manual triggers only. `oldestAt` is null when the count is zero. */
 export async function countManualChecksSince(
   domainId: string,
   since: Date,
@@ -124,11 +113,7 @@ export async function countManualChecksSince(
   return { total: row?.total ?? 0, oldestAt: row?.oldestAt ?? null }
 }
 
-/**
- * Writes the check row and the status change it implies as one server-side transaction.
- *
- * The only writer of `domains.status`.
- */
+/** The only writer of `domains.status`. */
 export async function recordCheck(outcome: CheckOutcome): Promise<Check> {
   const { check, transition } = outcome
   const { nextCheckAt, verifiedAt } = transition.changes

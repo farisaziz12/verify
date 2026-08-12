@@ -5,7 +5,6 @@ import { formatRelative, SECOND } from '@/lib/time'
 
 const REFRESH_MS = 30 * SECOND
 
-/** Client-only: the phrasing depends on the reader's clock. The dash is the server render. */
 export function RelativeTime({ value }: { value: Date | string | null }) {
   const [text, setText] = useState<string | null>(null)
 

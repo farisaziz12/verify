@@ -1,4 +1,3 @@
-/** A ring with a drawn check. Only for verified — every other state uses a plain dot. */
 export function VerifiedBadge() {
   return (
     <span className="border-edge-verified bg-status-verified-surface grid size-tip shrink-0 place-items-center rounded-full border">

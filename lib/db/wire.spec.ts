@@ -3,7 +3,6 @@ import type { QueryOutcome } from '@/lib/dns/types'
 import type { DiagnosisEvidence } from '@/lib/verification/diagnose'
 import { checkListSchema, domainDetailSchema, evidenceSchema, queryOutcomeSchema } from './wire'
 
-/** A domain row as it arrives over the wire, with timestamps still ISO strings. */
 const DOMAIN_ROW = {
   id: '019fe842-0000-7000-8000-000000000001',
   name: 'example.com',
@@ -17,14 +16,7 @@ const DOMAIN_ROW = {
   lastCheckedAt: null,
 }
 
-/**
- * One sample per union member, keyed by discriminant.
- *
- * The mapped type is the point: adding a `kind` to `QueryOutcome` without adding a sample
- * here fails to compile, so the table cannot fall behind the type it is covering. Parsing
- * each sample then proves the schema still accepts that member — the direction `satisfies`
- * cannot check, because a schema missing a member is still assignable to the wider union.
- */
+/** One sample per union member; a new `kind` without a sample here fails to compile. */
 const OUTCOMES: { [K in QueryOutcome['kind']]: Extract<QueryOutcome, { kind: K }> } = {
   answered: { kind: 'answered', records: [{ value: 'verify=abc' }], ttl: 300 },
   nodata: { kind: 'nodata', negativeTtl: 60 },
@@ -61,7 +53,6 @@ describe('evidenceSchema', () => {
   })
 })
 
-/** A stored row this client cannot read — a code from a newer deploy, or corruption. */
 const UNREADABLE_CHECK = {
   id: '019fe842-0000-7000-8000-000000000000',
   domainId: '019fe842-0000-7000-8000-000000000001',
@@ -86,7 +77,6 @@ describe('degrading on a row this client cannot read', () => {
     })
 
     expect(parsed.success).toBe(true)
-    // The name and the record — what the user came for — survive.
     expect(parsed.data?.latestCheck).toBeNull()
     expect(parsed.data?.record.value).toBe('verify=abc')
   })

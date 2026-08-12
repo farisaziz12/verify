@@ -20,12 +20,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
   })
 }
 
-/**
- * Removes a domain for good, along with its check history.
- *
- * The TXT record in the user's DNS is untouched — we cannot reach it, which is why the
- * confirmation says so. Deleting frees the name to be claimed again immediately.
- */
+/** Deletes the domain and its checks; the user's TXT record is left in place. */
 export async function DELETE(_request: Request, context: { params: Promise<{ id: string }> }) {
   const parsed = paramsSchema.safeParse(await context.params)
   if (!parsed.success)

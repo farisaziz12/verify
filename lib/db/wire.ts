@@ -5,8 +5,7 @@ import { DIAGNOSIS_CODES } from '@/lib/verification/codes'
 import type { DiagnosisEvidence } from '@/lib/verification/diagnose'
 import { checks, domains } from './schema'
 
-// Wire shapes after JSON. `satisfies z.ZodType<T>` catches a wrong union member, not a
-// missing one — the round-trip specs cover that direction.
+// Wire shapes after JSON.
 
 export const queryOutcomeSchema = z.discriminatedUnion('kind', [
   z.object({
@@ -62,30 +61,14 @@ export const domainListSchema = z.array(
   }),
 )
 
-/**
- * The detail payload.
- *
- * `latestCheck` falls back to null rather than failing the parse. A check row this client
- * cannot read — one written by a newer deploy, or corrupted — must not cost the user the
- * domain name and the record they came here to copy. They see "Not checked yet" and the page
- * still works.
- */
+/** `latestCheck` falls back to null rather than failing the parse. */
 export const domainDetailSchema = z.object({
   domain: domainSchema,
   record: recordSchema,
   latestCheck: checkSchema.nullable().catch(null),
 })
 
-/**
- * A check request's result.
- *
- * `checked: false` is the ordinary answer for an automatic check on a domain that was not
- * due — nothing ran, so there is no check and no new status.
- *
- * `nextCheckAt` is present either way, and is when the domain next becomes due. It is the
- * server telling the caller when to come back, so a polling client never has to guess a
- * cadence the server owns.
- */
+/** `checked: false` means the domain was not due. `nextCheckAt` is when it next becomes due. */
 export const checkResultSchema = z.discriminatedUnion('checked', [
   z.object({
     checked: z.literal(true),
@@ -98,15 +81,9 @@ export const checkResultSchema = z.discriminatedUnion('checked', [
 
 export const claimResultSchema = z.object({ domain: domainSchema, record: recordSchema })
 
-/** What a removal returns: the row that was deleted, so the caller can name it. */
 export const deleteResultSchema = z.object({ domain: domainSchema })
 
-/**
- * The timeline, with unreadable rows dropped rather than rejected.
- *
- * Same reasoning as `domainDetailSchema`: one row this client cannot parse costs that row,
- * not the whole history.
- */
+/** Unreadable rows are dropped, not rejected. */
 export const checkListSchema = z.array(z.unknown()).transform((rows) =>
   rows.flatMap((row) => {
     const parsed = checkSchema.safeParse(row)

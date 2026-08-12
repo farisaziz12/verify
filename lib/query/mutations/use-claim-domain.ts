@@ -6,12 +6,7 @@ import { claimResultSchema } from '@/lib/db/wire'
 import { apiFetch } from '@/lib/query/fetcher'
 import { queryKeys } from '@/lib/query/keys'
 
-/**
- * Claims a domain, then invalidates every domains query and returns to the list.
- *
- * Invalidation targets the root key, so a future detail or checks query is refreshed by
- * the same call without this hook learning about it.
- */
+/** Claims a domain, then invalidates every domains query and returns to the list. */
 export function useClaimDomain() {
   const queryClient = useQueryClient()
   const router = useRouter()

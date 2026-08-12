@@ -3,7 +3,6 @@
 import { Button } from '@/components/atoms/button'
 import { Card } from '@/components/atoms/card'
 
-/** Last stop for anything a section boundary did not catch. `reset` re-renders the route. */
 export default function RouteError({ reset }: { error: Error; reset: () => void }) {
   return (
     <Card className="flex flex-col items-start gap-3.5 px-5 py-7">

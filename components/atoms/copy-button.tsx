@@ -5,7 +5,6 @@ import { SECOND } from '@/lib/time'
 
 const CONFIRM_MS = 1.2 * SECOND
 
-/** Copies `value`, then shows a check for a moment. Each button confirms independently. */
 export function CopyButton({ value, label }: { value: string; label: string }) {
   const [copied, setCopied] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)

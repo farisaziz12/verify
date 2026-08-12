@@ -50,8 +50,6 @@ export function DomainDetail({ id }: { id: string }) {
         <CheckStatus domain={domain} latestCheck={latestCheck} />
       </ErrorBoundary>
 
-      {/* The instructions collapse to one line only while the record is actually in place.
-          A verified domain whose record has since changed needs them back. */}
       <ErrorBoundary label="The record to publish">
         {isVerified(domain) && !isStale ? (
           <RecordSummary name={record.name} value={record.value} />

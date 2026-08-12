@@ -35,8 +35,6 @@ describe('withFailover', () => {
     expect(backup.query).toHaveBeenCalledOnce()
   })
 
-  // The point of D2: a negative answer is an answer. Asking a second resolver whether it
-  // agrees would be consensus, which doubles latency and adds a state the UI must explain.
   it.each([
     ['nxdomain', NXDOMAIN],
     ['nodata', NODATA],

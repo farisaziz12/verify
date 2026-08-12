@@ -1,11 +1,6 @@
 import type { QueryResult, RecordType, Resolver } from './types'
 
-/**
- * Queries `primary`, falling back to `backup` on `kind: 'error'` and nothing else.
- *
- * `nxdomain` and `nodata` are answers, not failures, so they are never retried.
- * The returned `resolver` names whichever adapter answered.
- */
+/** Falls back to `backup` on `kind: 'error'` only; `nxdomain` and `nodata` are answers. */
 export function withFailover(primary: Resolver, backup: Resolver): Resolver {
   return {
     name: `${primary.name}->${backup.name}`,

@@ -57,7 +57,6 @@ describe('runCheck', () => {
     expect(query).toHaveBeenCalledOnce()
   })
 
-  // Not probing on success is the difference between one DNS query per check and two.
   it('does not probe the doubled name once the primary matched', async () => {
     const { resolver, query } = resolverFor({ '_claim.example.com': answered(recordValue(TOKEN)) })
     await runCheck(domain(), 'manual', { resolver, now: () => NOW })
@@ -109,7 +108,6 @@ describe('runCheck', () => {
     expect(manual.transition).toEqual(sweep.transition)
   })
 
-  // A failed lookup says nothing about the record, so it must not move the domain.
   it('leaves the status alone when DNS could not be reached', async () => {
     const { resolver } = resolverFor({ '_claim.example.com': { kind: 'error', reason: 'timeout' } })
 

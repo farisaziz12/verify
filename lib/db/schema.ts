@@ -13,7 +13,6 @@ export const domainStatus = pgEnum('domain_status', [
   'revoked',
 ])
 
-/** A claimed domain and its verification lifecycle state. */
 export const domains = pgTable(
   'domains',
   {
@@ -41,7 +40,6 @@ export const checkTrigger = pgEnum('check_trigger', ['manual', 'sweep'])
 
 export const checkVerdict = pgEnum('check_verdict', ['pass', 'fail', 'indeterminate'])
 
-/** One completed check and the evidence behind its verdict. */
 export const checks = pgTable(
   'checks',
   {
@@ -54,7 +52,7 @@ export const checks = pgTable(
     trigger: checkTrigger('trigger').notNull(),
     startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
     finishedAt: timestamp('finished_at', { withTimezone: true }).notNull(),
-    /** The query trail, in the order it was walked. */
+    /** In the order walked. */
     lookups: jsonb('lookups').$type<Lookup[]>().notNull(),
     verdict: checkVerdict('verdict').notNull(),
     diagnosisCode: text('diagnosis_code').$type<DiagnosisCode>().notNull(),

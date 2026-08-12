@@ -32,7 +32,6 @@ describe('verified', () => {
     expect(secondsFromNow(result.changes.nextCheckAt)).toBe(24 * 3600)
   })
 
-  // Hysteresis is the stretch: the enum values exist, the demotion path does not.
   it.each(['fail', 'indeterminate'] as const)('does not demote on a %s check', (verdict) => {
     const result = transition(domain('verified'), verdict, NOW)
     expect(result.from).toBe('verified')

@@ -4,15 +4,11 @@ import { Tooltip } from 'radix-ui'
 import { classNames } from '@/lib/class-names'
 
 interface InfoTipProps {
-  /** Announced to screen readers in place of the icon, e.g. "what this status means". */
   label: string
-  /** Plain text. The tooltip is one paragraph — it holds no interactive content. */
   children: string
-  /** Set when the tip sits in a flex row that would otherwise squash the icon. */
   shrink?: boolean
 }
 
-/** An explanatory sentence behind an info button, so the inline copy stays to the point. */
 export function InfoTip({ label, children, shrink = false }: InfoTipProps) {
   return (
     <Tooltip.Provider delayDuration={120}>

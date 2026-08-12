@@ -7,7 +7,6 @@ interface Provider {
   steps: string[]
 }
 
-// Provider names keep their own capitalisation — they are product names, not UI copy.
 const PROVIDERS: Provider[] = [
   {
     name: 'Cloudflare',

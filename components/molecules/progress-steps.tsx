@@ -8,13 +8,11 @@ const STEPS = [
 ]
 
 interface ProgressStepsProps {
-  /** 1-based, from `stageFor()`. */
   stage: 1 | 2 | 3
-  /** Colours the bar of the step currently in progress. */
   tone: StatusTone
 }
 
-/** Where the user is in setup: one 2px bar per step, the current one sweeping. */
+/** Where the user is in setup. */
 export function ProgressSteps({ stage, tone }: ProgressStepsProps) {
   return (
     <ol className="-mt-5 grid grid-cols-3">

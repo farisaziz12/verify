@@ -10,7 +10,6 @@ import type { Check } from '@/lib/db/schema'
 import { DIAGNOSES } from '@/lib/verification/codes'
 import { isComparison } from '@/lib/verification/diagnose'
 
-/** One check, expanding to show what it actually asked DNS. */
 export function ActivityRow({ check }: { check: Check }) {
   const { logTitle, tone } = DIAGNOSES[check.diagnosisCode]
   const evidence = check.evidence

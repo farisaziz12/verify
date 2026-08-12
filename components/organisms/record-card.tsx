@@ -1,8 +1,6 @@
 import { Card } from '@/components/atoms/card'
 import { CopyButton } from '@/components/atoms/copy-button'
 
-// TYPE has no copy button, so its third cell is empty rather than absent — the grid tracks
-// have to line up across all three rows.
 const ROW = 'grid grid-cols-[92px_1fr_32px] items-center gap-4 px-4 py-3'
 const LABEL = 'text-fg-subtle text-meta tracking-caps'
 const VALUE = 'text-fg text-ui font-mono break-all'

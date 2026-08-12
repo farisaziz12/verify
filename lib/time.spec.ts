@@ -12,7 +12,6 @@ import {
   secondsUntil,
 } from './time'
 
-/** Fixed so nothing here depends on when the suite runs. */
 const NOW = new Date('2026-08-09T12:00:00.000Z').getTime()
 const at = (offsetMs: number) => new Date(NOW + offsetMs)
 

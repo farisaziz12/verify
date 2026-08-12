@@ -5,10 +5,9 @@ import { apiFetch } from '@/lib/query/fetcher'
 import { queryKeys } from '@/lib/query/keys'
 import { SECOND } from '@/lib/time'
 
-/** How often the list re-reads while a domain on it could still change. */
 const PENDING_POLL_MS = 10 * SECOND
 
-/** Newest first. Refetches every `PENDING_POLL_MS` only while a row is still pending. */
+/** Newest first. Refetches only while a row is still pending. */
 export function domainsQueryOptions() {
   return queryOptions({
     queryKey: queryKeys.domains.list(),

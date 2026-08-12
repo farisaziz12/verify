@@ -4,25 +4,14 @@ import { Slider } from 'radix-ui'
 import { useState } from 'react'
 import { classNames } from '@/lib/class-names'
 
-/** Once the thumb has moved this far, it would sit on top of the label. */
 const LABEL_FADE_AT = 6
 
 interface SlideToConfirmProps {
-  /** Shown in the track until the thumb starts moving. */
   label: string
-  /** The slider's accessible name. Lands on the thumb, which is the element with the role. */
   ariaLabel: string
-  /** Fires once, when the thumb is released at the far end. */
   onConfirm: () => void
 }
 
-/**
- * A track that has to be dragged end to end to confirm.
- *
- * Committing happens on release, not on arrival, so the gesture can be abandoned by sliding
- * back. Holding an arrow key crosses in roughly three seconds, which is the keyboard
- * equivalent of a deliberate drag rather than a shortcut around it.
- */
 export function SlideToConfirm({ label, ariaLabel, onConfirm }: SlideToConfirmProps) {
   const [percent, setPercent] = useState(0)
 

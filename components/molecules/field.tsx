@@ -22,7 +22,7 @@ interface FieldProps {
   onSubmit?: () => void
 }
 
-/** Label, input, and a single hint slot that is helper text, live preview, and error in turn. */
+/** Label, input, and a single hint slot. */
 export function Field({
   label,
   hint,

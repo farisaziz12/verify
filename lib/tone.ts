@@ -1,4 +1,3 @@
-/** The four colours a status can read as, and the classes that render each one. */
 export type StatusTone = 'verified' | 'attention' | 'pending' | 'inactive'
 
 export const TONE = {

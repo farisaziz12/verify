@@ -2,12 +2,7 @@
 
 import { AlertDialog } from 'radix-ui'
 
-/**
- * What the dialog becomes once the domain is gone.
- *
- * Uses `AlertDialog.Title` and `Description` so the announcement replaces the question rather
- * than being appended to it, which is what a screen reader would otherwise read out.
- */
+/** What the dialog becomes once the domain is gone. */
 export function Removed({ name }: { name: string }) {
   return (
     <div className="flex items-center gap-3.5 px-5 py-6">

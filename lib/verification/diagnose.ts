@@ -2,23 +2,19 @@ import type { QueryFailureReason, QueryOutcome } from '@/lib/dns/types'
 import { formatCoarseDuration, SECOND } from '@/lib/time'
 import { DIAGNOSES, type DiagnosisCode, type Verdict } from './codes'
 
-/** Below this, a negative answer expires before a user would notice it. */
 const ADVISORY_TTL_THRESHOLD_SECONDS = 300
 
-/** What we expected against what we found — the pair a failed check is explained by. */
 export interface ComparisonEvidence {
   expected: string
   found: string[]
 }
 
-/** Why a lookup could not be completed. Carries no claim about the record. */
 export interface FailureEvidence {
   reason: QueryFailureReason
 }
 
 export type DiagnosisEvidence = ComparisonEvidence | FailureEvidence
 
-/** Narrows evidence to the comparison form, which is the only one the UI renders as a diff. */
 export function isComparison(evidence: DiagnosisEvidence | null): evidence is ComparisonEvidence {
   return evidence !== null && 'expected' in evidence
 }
@@ -27,30 +23,22 @@ export interface Diagnosis {
   code: DiagnosisCode
   verdict: Verdict
   evidence?: DiagnosisEvidence
-  /** Advisory lines. Never change the code or verdict. */
   notes?: string[]
 }
 
 export interface DiagnoseInput {
   /** TXT at `_claim.<domain>`. */
   primary: QueryOutcome
-  /** TXT at the doubled name, or null when the primary already matched. */
+  /** TXT at the doubled name; null when the primary already matched. */
   probe: QueryOutcome | null
-  /** The exact string the record must hold, i.e. `verify=<token>`. */
   expectedValue: string
-  /** The name that should hold it, i.e. `_claim.<domain>`. Reported as evidence. */
   expectedName: string
-  /** The doubled name the probe asked for, reported when it is where the token turned up. */
   probeName: string
-  /** How long ago the domain was claimed; drives the negative-cache advisory. */
+  /** Milliseconds since the claim. */
   claimAgeMs: number
 }
 
-/**
- * First match wins, in this order: match, appended, mismatch, absence.
- *
- * `DNS_UNREACHABLE` is `indeterminate`, never `fail`.
- */
+/** First match wins, in this order: match, appended, mismatch, absence. */
 export function diagnose(input: DiagnoseInput): Diagnosis {
   const { primary, probe, expectedValue } = input
 
@@ -59,8 +47,6 @@ export function diagnose(input: DiagnoseInput): Diagnosis {
   }
 
   if (probe?.kind === 'answered' && hasValue(probe, expectedValue)) {
-    // The evidence here is the pair of names, not values — the value is correct, it is just
-    // one level too deep.
     return build('ZONE_NAME_APPENDED', {
       evidence: { expected: input.expectedName, found: [input.probeName] },
     })

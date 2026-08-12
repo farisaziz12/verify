@@ -4,7 +4,6 @@ import { Accordion } from 'radix-ui'
 import type { ReactNode } from 'react'
 
 interface DisclosureProps {
-  /** Unique within its group; the group tracks which value is open. */
   value: string
   label: ReactNode
   children: ReactNode

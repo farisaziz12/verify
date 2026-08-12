@@ -1,9 +1,6 @@
 'use client'
 
-/**
- * Replaces the root layout when it is the layout itself that failed, so this cannot rely on
- * anything the app provides — no fonts, no tokens, no components. Inline styles only.
- */
+/** Replaces a failed root layout, so nothing the app provides is available here. */
 export default function GlobalError({ reset }: { error: Error; reset: () => void }) {
   return (
     <html lang="en">

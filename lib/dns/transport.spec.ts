@@ -25,8 +25,6 @@ describe('the request the adapter sends', () => {
     expect(new Headers(init.headers).get('accept')).toBe('application/dns-json')
   })
 
-  // Next patches fetch with its own cache. A remembered DNS answer would tell a user their
-  // record is still missing minutes after they fixed it.
   it('opts out of caching', async () => {
     const fetchMock = stubFetch(() => jsonResponse(cloudflareAnswered))
     await cloudflareResolver.query('_claim.example.com', 'TXT')
@@ -52,7 +50,6 @@ describe('the request the adapter sends', () => {
 
 describe('every way a query can fail', () => {
   it('maps a non-2xx to malformed without reading the body', async () => {
-    // Google answers a 400 with HTML, so parsing it would throw rather than classify.
     const body = { json: vi.fn() }
     stubFetch(() =>
       Promise.resolve(

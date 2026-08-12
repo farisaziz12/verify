@@ -17,7 +17,6 @@ export function DomainTable({ rows }: { rows: DomainListRow[] }) {
       </div>
 
       {rows.map(({ domain, latestDiagnosis }) => (
-        // Per row, so one unreadable domain costs its own line and not the whole table.
         <ErrorBoundary
           key={domain.id}
           label="This domain"

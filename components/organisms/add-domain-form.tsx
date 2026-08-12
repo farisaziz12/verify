@@ -54,18 +54,7 @@ export function AddDomainForm() {
   )
 }
 
-/**
- * Resolves the hint slot's text and tone. First match wins:
- *
- *   1. a server error — a 409 or 400 the client could not have predicted
- *   2. empty, already submitted — "Enter a domain"
- *   3. empty, untouched — the idle helper text
- *   4. invalid input — the normalizer's own message
- *   5. valid input — the normalized preview
- *
- * The server error outranks local validation because it is newer information: the input
- * is locally valid in that case, and only the server knew it was taken.
- */
+/** Resolves the hint slot's text and tone; first match wins. */
 function resolveHint({
   normalized,
   serverError,
