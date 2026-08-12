@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   DAY,
   formatClockTime,
+  formatCoarseDuration,
   formatCountdown,
   formatRelative,
   HOUR,
@@ -82,5 +83,30 @@ describe('formatRelative', () => {
 describe('formatClockTime', () => {
   it('is 24-hour with two digits in every field', () => {
     expect(formatClockTime(new Date(NOW))).toMatch(/^\d{2}:\d{2}:\d{2}$/)
+  })
+})
+
+describe('formatCoarseDuration', () => {
+  it('stays in minutes while the number is small', () => {
+    expect(formatCoarseDuration(5 * MINUTE)).toBe('5 minutes')
+    expect(formatCoarseDuration(60 * MINUTE)).toBe('60 minutes')
+  })
+
+  it('switches to hours rather than reporting 1440 minutes', () => {
+    expect(formatCoarseDuration(2 * HOUR)).toBe('2 hours')
+    expect(formatCoarseDuration(24 * HOUR)).toBe('24 hours')
+  })
+
+  it('reaches days only once hours would read as a large number', () => {
+    expect(formatCoarseDuration(3 * DAY)).toBe('3 days')
+  })
+
+  it('singularises', () => {
+    expect(formatCoarseDuration(MINUTE)).toBe('1 minute')
+    expect(formatCoarseDuration(2 * DAY)).toBe('2 days')
+  })
+
+  it('rounds a partial minute up, so a wait is never understated', () => {
+    expect(formatCoarseDuration(90 * SECOND)).toBe('2 minutes')
   })
 })

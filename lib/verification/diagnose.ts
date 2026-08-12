@@ -1,5 +1,5 @@
 import type { QueryFailureReason, QueryOutcome } from '@/lib/dns/types'
-import { MINUTE, SECOND } from '@/lib/time'
+import { formatCoarseDuration, SECOND } from '@/lib/time'
 import { DIAGNOSES, type DiagnosisCode, type Verdict } from './codes'
 
 /** Below this, a negative answer expires before a user would notice it. */
@@ -102,8 +102,7 @@ function cacheAdvisory(negativeTtl: number | null, input: DiagnoseInput): string
   if (negativeTtl === null || negativeTtl <= ADVISORY_TTL_THRESHOLD_SECONDS) return []
   if (input.claimAgeMs > negativeTtl * 2 * SECOND) return []
 
-  const minutes = Math.ceil((negativeTtl * SECOND) / MINUTE)
   return [
-    `A resolver may remember this record's absence for up to ~${minutes} minutes after you add it. Nothing is wrong on your end.`,
+    `A resolver may remember this record's absence for up to ~${formatCoarseDuration(negativeTtl * SECOND)} after you add it. Nothing is wrong on your end.`,
   ]
 }

@@ -51,3 +51,19 @@ export function formatClockTime(at: Date): string {
     hour12: false,
   })
 }
+
+/**
+ * A duration in the largest unit that keeps the number small: `45 minutes`, `2 hours`, `1 day`.
+ *
+ * For copy a person reads once, where `1440 minutes` is arithmetic rather than an answer.
+ */
+export function formatCoarseDuration(ms: number): string {
+  const [amount, unit] =
+    ms < 90 * MINUTE
+      ? [Math.ceil(ms / MINUTE), 'minute']
+      : ms < 36 * HOUR
+        ? [Math.round(ms / HOUR), 'hour']
+        : [Math.round(ms / DAY), 'day']
+
+  return `${amount} ${unit}${amount === 1 ? '' : 's'}`
+}
