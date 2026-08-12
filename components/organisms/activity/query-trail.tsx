@@ -3,7 +3,7 @@ import type { Lookup, QueryOutcome } from '@/lib/dns/types'
 /** Every DNS query this check ran: the name asked, the answer, and how long it took. */
 export function QueryTrail({ lookups }: { lookups: Lookup[] }) {
   return (
-    <dl className="text-hint grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 font-mono">
+    <dl className="text-hint grid grid-cols-[1fr_auto] gap-x-3 gap-y-1 font-mono sm:gap-x-4">
       <dt className="text-fg-subtle tracking-[0.3px]">query</dt>
       <dd className="text-fg-subtle text-right tracking-[0.3px]">latency</dd>
 

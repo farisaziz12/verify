@@ -6,6 +6,7 @@ import {
   getDomain,
   listChecks,
   recordCheck,
+  TIMELINE_LENGTH,
 } from '@/lib/db/queries'
 import { defaultResolver } from '@/lib/dns'
 import { MINUTE, SECOND } from '@/lib/time'
@@ -17,14 +18,6 @@ const MANUAL_WINDOW_MS = 5 * MINUTE
 
 /** How long a claimed check is held before another request may retry it. */
 const CLAIM_LEASE_MS = MINUTE
-
-/**
- * How many checks the timeline returns.
- *
- * The trail is for reading, not auditing: five is enough to show the shape of what happened
- * — a mismatch, a fix, a pass — without shipping every stored `lookups` trail on each poll.
- */
-const TIMELINE_LENGTH = 5
 
 const paramsSchema = z.object({ id: z.uuid('That is not a valid domain id.') })
 const bodySchema = z.object({ trigger: z.enum(['manual', 'auto']).default('manual') })

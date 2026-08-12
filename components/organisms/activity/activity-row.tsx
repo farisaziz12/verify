@@ -19,7 +19,7 @@ export function ActivityRow({ check }: { check: Check }) {
   return (
     <Accordion.Item value={check.id} className="border-edge-subtle border-b">
       <Accordion.Header>
-        <Accordion.Trigger className="hover:bg-card focus-visible:outline-fg group grid w-full cursor-pointer grid-cols-[14px_96px_1fr_auto] items-center gap-3 bg-transparent px-4 py-2.5 text-left transition-colors focus-visible:-outline-offset-2 focus-visible:outline-2">
+        <Accordion.Trigger className="hover:bg-card focus-visible:outline-fg group grid w-full cursor-pointer grid-cols-[14px_1fr_auto] items-center gap-3 sm:grid-cols-[14px_96px_1fr_auto] bg-transparent px-4 py-2.5 text-left transition-colors focus-visible:-outline-offset-2 focus-visible:outline-2">
           <svg
             width="10"
             height="10"
@@ -38,7 +38,7 @@ export function ActivityRow({ check }: { check: Check }) {
             />
           </svg>
 
-          <span className="text-fg-subtle text-hint font-mono">
+          <span className="text-fg-subtle text-hint hidden font-mono sm:block">
             <Timestamp value={check.startedAt} />
           </span>
 
