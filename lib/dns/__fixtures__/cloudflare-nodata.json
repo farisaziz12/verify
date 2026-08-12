@@ -1,0 +1,22 @@
+{
+  "Status": 0,
+  "TC": false,
+  "RD": true,
+  "RA": true,
+  "AD": false,
+  "CD": false,
+  "Question": [
+    {
+      "name": "a.gtld-servers.net",
+      "type": 16
+    }
+  ],
+  "Authority": [
+    {
+      "name": "gtld-servers.net",
+      "type": 6,
+      "TTL": 85757,
+      "data": "av4.nstld.com. nstld.verisign-grs.com. 1786234709 3600 900 1209600 86400"
+    }
+  ]
+}

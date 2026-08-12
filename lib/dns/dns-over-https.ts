@@ -1,0 +1,110 @@
+import { z } from 'zod'
+import { SECOND } from '@/lib/time'
+import { decodeCloudflareTxt, decodeGoogleTxt } from './presentation-format'
+import type { QueryOutcome, QueryResult, RecordType, Resolver } from './types'
+
+const QUERY_TIMEOUT_MS = 3 * SECOND
+
+const TYPE_TXT = 16
+const TYPE_SOA = 6
+
+const STATUS_NOERROR = 0
+const STATUS_NXDOMAIN = 3
+
+const dnsJsonRecordSchema = z.object({
+  name: z.string(),
+  type: z.number(),
+  TTL: z.number().optional(),
+  data: z.string(),
+})
+
+const dnsJsonResponseSchema = z.object({
+  Status: z.number(),
+  Answer: z.array(dnsJsonRecordSchema).optional(),
+  Authority: z.array(dnsJsonRecordSchema).optional(),
+})
+
+type DnsJsonResponse = z.infer<typeof dnsJsonResponseSchema>
+
+export function classifyResponse(
+  body: DnsJsonResponse,
+  decode: (data: string) => string,
+): QueryOutcome {
+  if (body.Status === STATUS_NXDOMAIN) {
+    return { kind: 'nxdomain', negativeTtl: negativeTtlFromSoa(body) }
+  }
+  if (body.Status !== STATUS_NOERROR) {
+    return { kind: 'error', reason: 'servfail' }
+  }
+
+  const answers = (body.Answer ?? []).filter((record) => record.type === TYPE_TXT)
+  if (answers.length === 0) {
+    return { kind: 'nodata', negativeTtl: negativeTtlFromSoa(body) }
+  }
+
+  return {
+    kind: 'answered',
+    records: answers.map((record) => ({ value: decode(record.data) })),
+    ttl: Math.min(...answers.map((record) => record.TTL ?? 0)),
+  }
+}
+
+/** Null when the Authority section carries no SOA. */
+function negativeTtlFromSoa(body: DnsJsonResponse): number | null {
+  const soa = (body.Authority ?? []).find((record) => record.type === TYPE_SOA)
+  return soa?.TTL ?? null
+}
+
+function createResolver(
+  name: string,
+  endpoint: string,
+  decode: (data: string) => string,
+): Resolver {
+  return {
+    name,
+    async query(recordName: string, type: RecordType): Promise<QueryResult> {
+      const url = `${endpoint}?name=${encodeURIComponent(recordName)}&type=${type}`
+
+      // The only try/catch around DNS in the codebase.
+      try {
+        const response = await fetch(url, {
+          headers: { accept: 'application/dns-json' },
+          cache: 'no-store',
+          signal: AbortSignal.timeout(QUERY_TIMEOUT_MS),
+        })
+
+        if (!response.ok) {
+          return { resolver: name, outcome: { kind: 'error', reason: 'malformed' } }
+        }
+
+        const body = dnsJsonResponseSchema.safeParse(await response.json())
+        if (!body.success) {
+          return { resolver: name, outcome: { kind: 'error', reason: 'malformed' } }
+        }
+
+        return { resolver: name, outcome: classifyResponse(body.data, decode) }
+      } catch (error) {
+        return { resolver: name, outcome: { kind: 'error', reason: failureReason(error) } }
+      }
+    },
+  }
+}
+
+function failureReason(error: unknown): 'timeout' | 'network' | 'malformed' {
+  if (error instanceof DOMException) {
+    if (error.name === 'TimeoutError' || error.name === 'AbortError') return 'timeout'
+  }
+  return error instanceof SyntaxError ? 'malformed' : 'network'
+}
+
+export const cloudflareResolver = createResolver(
+  'cloudflare',
+  'https://cloudflare-dns.com/dns-query',
+  decodeCloudflareTxt,
+)
+
+export const googleResolver = createResolver(
+  'google',
+  'https://dns.google/resolve',
+  decodeGoogleTxt,
+)
