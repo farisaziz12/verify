@@ -53,25 +53,17 @@ export function ProviderSetup({ recordName }: { recordName: string }) {
   return (
     <div className="flex flex-col gap-3">
       <DisclosureGroup>
-        <Disclosure
-          value="host-field"
-          label="Where does the NAME go? My provider's form looks different"
-        >
+        <Disclosure value="host-field" label="Where does the NAME go?">
           <p>
-            Every provider's form has a field for the record's name — it may be called{' '}
-            <span className="text-fg-bright">name</span>,{' '}
-            <span className="text-fg-bright">host</span>, or{' '}
-            <span className="text-fg-bright">hostname</span>. That's where the NAME from the card
-            above goes.
+            Your provider calls the field <span className="text-fg-bright">name</span>,{' '}
+            <span className="text-fg-bright">host</span> or{' '}
+            <span className="text-fg-bright">hostname</span>. The NAME above goes there.
           </p>
           <p>
-            Type just <Mono>_claim</Mono> there — most forms add your domain to the end for you. If
-            the form shows the full name as you type, paste <Mono>{recordName}</Mono> instead.
+            Most forms add your domain for you, so type just <Mono>_claim</Mono>. If the form shows
+            the full name as you type, paste <Mono>{recordName}</Mono> instead.
           </p>
-          <p>
-            Not sure which you have? Pick either — our check tells you what it found and how to fix
-            it.
-          </p>
+          <p>Either way, we'll check and point you in the right direction.</p>
         </Disclosure>
       </DisclosureGroup>
 
