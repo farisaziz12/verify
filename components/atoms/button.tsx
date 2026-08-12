@@ -2,7 +2,7 @@ import { Slot } from 'radix-ui'
 import type { ButtonHTMLAttributes } from 'react'
 import { classNames } from '@/lib/class-names'
 
-type Variant = 'primary' | 'ghost' | 'link'
+type Variant = 'primary' | 'ghost' | 'link' | 'danger'
 type Size = 'sm' | 'md'
 
 const VARIANT = {
@@ -10,6 +10,10 @@ const VARIANT = {
     'bg-inverse text-page border border-inverse font-medium hover:bg-inverse-hover hover:border-inverse-hover',
   ghost: 'bg-transparent text-fg border border-edge hover:border-edge-strong',
   link: 'text-fg-muted hover:text-fg w-fit border-0 bg-transparent p-0',
+  // Not a status tone: this colours an action the user is about to take, not a state a
+  // domain is in, so it stays out of `lib/tone.ts`.
+  danger:
+    'bg-danger-surface text-danger border border-edge-danger font-medium hover:bg-danger-surface-hover hover:border-edge-danger-hover',
 } satisfies Record<Variant, string>
 
 const SIZE = {

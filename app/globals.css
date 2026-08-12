@@ -44,6 +44,7 @@
   --color-edge-strong: #383838;
   --color-edge-focus: #4a4a4a;
   --color-edge-danger: #3a2a2a;
+  --color-edge-danger-hover: #4a3030;
   --color-edge-tooltip: #2c2c2c;
   /* The verified card and its check badge share a green-tinted ring. */
   --color-edge-verified: #2b3a31;
@@ -58,6 +59,11 @@
   --color-inverse-hover: #e8e8e8;
 
   --color-danger: #cf6b6b;
+  /* Fill behind a destructive control — a red so dark it reads as a surface. */
+  --color-danger-surface: #1a1212;
+  --color-danger-surface-hover: #221515;
+  /* The portion of a slide-to-confirm track already crossed. */
+  --color-danger-track: rgb(207 107 107 / 0.1);
 
   --color-status-verified: #58a97a;
   --color-status-attention: #c99a4a;
@@ -85,6 +91,48 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Panels and confirmations arrive from just below, never from nowhere. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Draws a check stroke on. Pairs with stroke-dasharray on the path. */
+@keyframes draw {
+  from {
+    stroke-dashoffset: 16;
+  }
+  to {
+    stroke-dashoffset: 0;
   }
 }
 
