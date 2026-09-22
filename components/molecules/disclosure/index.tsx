@@ -35,7 +35,7 @@ export function Disclosure({ value, label, children }: DisclosureProps) {
         </Accordion.Trigger>
       </Accordion.Header>
       <Accordion.Content className="overflow-hidden">
-        <div className="text-fg-muted text-ui flex max-w-[62ch] flex-col gap-2 pt-1 pb-3.5 pl-[34px] text-pretty">
+        <div className="text-fg-muted text-ui flex max-w-prose flex-col gap-2 pt-1 pb-3.5 pl-disclosure text-pretty">
           {children}
         </div>
       </Accordion.Content>

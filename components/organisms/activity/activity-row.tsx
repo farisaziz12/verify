@@ -52,7 +52,7 @@ export function ActivityRow({ check }: { check: Check }) {
       </Accordion.Header>
 
       <Accordion.Content className="overflow-hidden">
-        <div className="flex flex-col gap-2.5 pt-0.5 pr-4 pb-3.5 pl-[42px]">
+        <div className="flex flex-col gap-2.5 pt-0.5 pr-4 pb-3.5 pl-activity">
           {isComparison(evidence) && (
             <Evidence expected={evidence.expected} found={evidence.found} />
           )}

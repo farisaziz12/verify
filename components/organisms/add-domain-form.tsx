@@ -28,7 +28,7 @@ export function AddDomainForm() {
   }
 
   return (
-    <div className="flex max-w-[480px] flex-col gap-2">
+    <div className="flex max-w-form flex-col gap-2">
       <Field
         label="Domain"
         placeholder="example.com"

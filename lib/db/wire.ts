@@ -39,7 +39,6 @@ export const domainSchema = createSelectSchema(domains, {
   nextCheckAt: z.coerce.date(),
   claimedAt: z.coerce.date(),
   verifiedAt: z.coerce.date().nullable(),
-  failingSince: z.coerce.date().nullable(),
   lastCheckedAt: z.coerce.date().nullable(),
 })
 

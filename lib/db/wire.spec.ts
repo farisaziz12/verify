@@ -8,11 +8,9 @@ const DOMAIN_ROW = {
   name: 'example.com',
   token: 'abc',
   status: 'pending',
-  consecutiveFailures: 0,
   nextCheckAt: '2026-08-09T12:00:30.000Z',
   claimedAt: '2026-08-09T12:00:00.000Z',
   verifiedAt: null,
-  failingSince: null,
   lastCheckedAt: null,
 }
 

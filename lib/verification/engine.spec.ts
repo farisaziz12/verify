@@ -12,11 +12,9 @@ const domain = (overrides: Partial<Domain> = {}): Domain => ({
   name: 'example.com',
   token: TOKEN,
   status: 'pending',
-  consecutiveFailures: 0,
   nextCheckAt: NOW,
   claimedAt: NOW,
   verifiedAt: null,
-  failingSince: null,
   lastCheckedAt: null,
   ...overrides,
 })

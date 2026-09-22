@@ -28,6 +28,13 @@
   --spacing-control-lg: 36px;
   --spacing-tooltip: 280px;
   --spacing-tip: 18px;
+  --spacing-disclosure: 34px;
+  --spacing-activity: 42px;
+
+  --max-width-page: 780px;
+  --max-width-form: 480px;
+  --max-width-prose: 62ch;
+  --max-width-prose-wide: 64ch;
 
   --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.4);
 
