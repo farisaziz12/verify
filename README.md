@@ -96,7 +96,7 @@ sequenceDiagram
     end
 ```
 
-The browser queries a NextJS API handler, which initiates a TXT record lookup and compares
+The browser queries a Next.js API handler, which initiates a TXT record lookup and compares
 it to the stored token, saves a diagnosis, and returns the current status.
 
 Verify also checks the repeated hostname form:
@@ -111,7 +111,7 @@ This catches a common DNS-provider mistake. A user enters the full record name e
 
 We save the diagnosis so it is still there after a page reload and the UI can say why a check failed, without needing to re-calculate the result.
 
-The following failures are seperately recognized and seperately handled:
+The following failures are separately recognized and separately handled:
 
 - no record found
 - record at the wrong hostname
@@ -180,6 +180,21 @@ pnpm test
 pnpm build
 ```
 
+## Architecture
+
+Verification is a thin pure core with I/O at the edges:
+
+1. **DNS** (`lib/dns/`) — DoH adapters return a `QueryOutcome` value; transport
+   failures never throw past the adapter.
+2. **Diagnose** (`lib/verification/diagnose.ts`) — turns outcomes into a diagnosis
+   code (match, doubled hostname, mismatch, missing, unreachable).
+3. **Machine** (`lib/verification/machine.ts`) — the only producer of status
+   changes; schedules `next_check_at`.
+4. **Engine** (`lib/verification/engine.ts`) — shared by manual and automatic
+   checks; performs lookups and returns data for the caller to persist.
+
+Design choices and deliberate non-goals live in [`docs/DECISIONS.md`](docs/DECISIONS.md).
+
 ## Implementation notes
 
 ### Tokens
@@ -200,12 +215,13 @@ application a structured DNS response that can be classified before the result i
 
 ### Rechecks
 
-Rechecks run while the detail page is open. There is no background verification job in place (out of scope)
+Rechecks run while the detail page is open. There is no background verification job
+(out of scope).
 
 ### Product features
 
-- **Accounts and private workspaces** — There is no level of authentication or relationship between a user session and the domains they are attempting to or have verified. Every domain in this
-  deployment is visible to anyone with the app URL.
+- **Accounts and private workspaces** — There is no authentication or ownership.
+  Every domain in this deployment is visible to anyone with the app URL.
 - **Notifications** — no email or webhooks when a domain verifies, drifts, or expires.
 
 ### Lifecycle depth
@@ -213,6 +229,9 @@ Rechecks run while the detail page is open. There is no background verification 
 - **Record drift** — a verified domain stays verified if the TXT record later goes missing
   or changes, even though domain ownership can change over time. Status never moves back.
 - **Background checks** — there is no cron sweep. DNS is only queried on the detail page.
+- **Reserved statuses** — the database enum still includes `expired`,
+  `temporarily_failed`, and `revoked`, but the machine never writes them. Unused
+  failure-counter columns were removed; see D6 in `docs/DECISIONS.md`.
 
 ### Scale and polish
 
@@ -221,13 +240,11 @@ Rechecks run while the detail page is open. There is no background verification 
   rather than the full history.
 - **Mobile-specific layout work** — the UI is responsive, but layouts were not redesigned
   or optimized specifically for mobile.
-- **Offline caching** — no background sync to show the last known state instantly when
-  checks run more than once a day.
-- **in-depth provider-specific setup guides** — DNS instructions stay basic rather than covering
+- **Provider-specific setup guides** — DNS instructions stay basic rather than covering
   each provider in depth.
-- **Multi-resolver consensus** — checks use Cloudflare first. If Cloudflare fails, the platform
-  tries Google instead. This prevents a Cloudflare outage from being reported as a
-  problem with the user's DNS.
+- **Multi-resolver consensus** — checks use Cloudflare first. If Cloudflare fails, the
+  platform tries Google instead. This prevents a Cloudflare outage from being reported as
+  a problem with the user's DNS.
 
   The platform does not query both services every time. Doing that would make checks slower
   and create another result to explain when they differ. Both queries also come from

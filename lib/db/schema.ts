@@ -1,10 +1,14 @@
 import { sql } from 'drizzle-orm'
-import { index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { index, jsonb, pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { uuidv7 } from 'uuidv7'
 import type { Lookup } from '../dns/types'
 import type { DiagnosisCode } from '../verification/codes'
 import type { DiagnosisEvidence } from '../verification/diagnose'
 
+/**
+ * `expired`, `temporarily_failed`, and `revoked` are reserved enum values.
+ * The lifecycle machine only writes `pending` and `verified`; see docs/DECISIONS.md.
+ */
 export const domainStatus = pgEnum('domain_status', [
   'pending',
   'verified',
@@ -22,17 +26,15 @@ export const domains = pgTable(
     name: text('name').notNull().unique(),
     token: text('token').notNull(),
     status: domainStatus('status').notNull().default('pending'),
-    consecutiveFailures: integer('consecutive_failures').notNull().default(0),
     nextCheckAt: timestamp('next_check_at', { withTimezone: true }).notNull(),
     claimedAt: timestamp('claimed_at', { withTimezone: true }).notNull().defaultNow(),
     verifiedAt: timestamp('verified_at', { withTimezone: true }),
-    failingSince: timestamp('failing_since', { withTimezone: true }),
     lastCheckedAt: timestamp('last_checked_at', { withTimezone: true }),
   },
   (table) => [
     index('domains_next_check_at_idx')
       .on(table.nextCheckAt)
-      .where(sql`${table.status} in ('pending', 'verified', 'temporarily_failed')`),
+      .where(sql`${table.status} in ('pending', 'verified')`),
   ],
 )
 

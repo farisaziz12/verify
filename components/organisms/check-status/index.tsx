@@ -65,10 +65,10 @@ export function CheckStatus({ domain, latestCheck }: CheckStatusProps) {
 
       {isComparison(evidence) && <Evidence expected={evidence.expected} found={evidence.found} />}
 
-      {view.action && <p className="text-fg text-ui max-w-[64ch] text-pretty">{view.action}</p>}
+      {view.action && <p className="text-fg text-ui max-w-prose-wide text-pretty">{view.action}</p>}
 
       {notes?.map((note) => (
-        <p key={note} className="text-fg-subtle text-hint max-w-[64ch] text-pretty">
+        <p key={note} className="text-fg-subtle text-hint max-w-prose-wide text-pretty">
           {note}
         </p>
       ))}
