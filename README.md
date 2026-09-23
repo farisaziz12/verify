@@ -23,7 +23,9 @@ pnpm install
 cp .env.example .env
 ```
 
-Set `DATABASE_URL` in `.env`.
+Set `DATABASE_URL` in `.env`. Leave `SITE_PASSWORD` empty for local development.
+Set `SITE_PASSWORD` on Vercel (Production and Preview) to require a password;
+access lasts one hour.
 
 Run the migrations, then start the development server:
 
@@ -220,8 +222,10 @@ Rechecks run while the detail page is open. There is no background verification 
 
 ### Product features
 
-- **Accounts and private workspaces** — There is no authentication or ownership.
-  Every domain in this deployment is visible to anyone with the app URL.
+- **Accounts and private workspaces** — There is no per-user authentication or
+  ownership. When `SITE_PASSWORD` is set, a shared password is required and access
+  lasts one hour. Anyone who gets in still sees every domain in the deployment.
+  With the variable unset, the app is open to anyone with the URL.
 - **Notifications** — no email or webhooks when a domain verifies, drifts, or expires.
 
 ### Lifecycle depth

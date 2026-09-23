@@ -25,4 +25,12 @@ describe('parseEnv', () => {
   it('rejects an empty value', () => {
     expect(() => parseEnv({ DATABASE_URL: '' })).toThrow()
   })
+
+  it('omits an empty site password and keeps one that is set', () => {
+    expect(parseEnv({ DATABASE_URL: VALID, SITE_PASSWORD: '' })).toEqual({ DATABASE_URL: VALID })
+    expect(parseEnv({ DATABASE_URL: VALID, SITE_PASSWORD: 's3cret' })).toEqual({
+      DATABASE_URL: VALID,
+      SITE_PASSWORD: 's3cret',
+    })
+  })
 })
