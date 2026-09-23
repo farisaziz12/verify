@@ -21,8 +21,10 @@ layer this project is *not* about. The project is judged on DNS diagnosis.
 filter in the query layer. The engine, the ladder, and the machine never look at
 ownership.
 
-**Cost accepted:** anyone with the URL sees every claimed domain. Correct for a
-demo, wrong for production, and stated here rather than discovered.
+**Cost accepted:** anyone who can open the deployment sees every claimed domain.
+There is still no per-visitor ownership. A shared password can close the URL
+(D7). Correct for a demo, wrong for production accounts, and stated here rather
+than discovered.
 
 ## D2 · Two resolvers, as failover — not consensus
 
@@ -87,6 +89,22 @@ rewriting historical migrations to pretend they never existed.
 values remain available if hysteresis or revocation is added later; dead columns
 do not.
 
+## D7 · Shared password on the deployment, not per visitor
+
+**Chosen:** when `SITE_PASSWORD` is set, `proxy.ts` requires an HttpOnly cookie
+signed with that password. The cookie expires after one hour. Unset, the gate
+is off, so local development and CI stay open.
+
+**Rejected:** accounts, a session table, and scoping domains to a visitor (still
+D1). Also rejected: an unsigned cookie, which anyone could set.
+
+**Why:** the deployed URL is public. A shared password closes the demo without
+an ownership model. The engine, the ladder, and the machine still never look at
+who is asking.
+
+**Cost accepted:** anyone who has the password sees every domain. There is no
+throttle on password guesses.
+
 ---
 
 ## Scope
@@ -102,7 +120,7 @@ the appended-name probe, and the UI that renders diagnoses and check activity.
 
 | Not built | Why |
 |---|---|
-| Accounts and sessions | D1 |
+| Accounts and per-visitor sessions | D1. A shared deployment password is D7. |
 | Multi-resolver consensus | D2 — failover ships |
 | Hysteresis / revocation transitions | D6 — enum values reserved; transitions not built |
 | Background cron sweep | Checks run on-read from the detail page only |
@@ -115,7 +133,8 @@ the appended-name probe, and the UI that renders diagnoses and check activity.
 
 ### Known limitations
 
-1. **The domain list is public to anyone with the URL** (D1).
+1. **Anyone with the password sees every domain** (D1, D7). With `SITE_PASSWORD`
+   unset, the deployment is open to anyone with the URL.
 2. **Two resolvers, one vantage point** — shared egress IP (D2).
 3. **Migrations are applied by hand**, not by CI. Deploy and schema change are
    two separate acts.

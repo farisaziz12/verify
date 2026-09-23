@@ -18,6 +18,9 @@ interface FieldProps {
   value: string
   placeholder?: string
   autoFocus?: boolean
+  type?: 'text' | 'password'
+  name?: string
+  autoComplete?: string
   onChange: (value: string) => void
   onSubmit?: () => void
 }
@@ -30,6 +33,9 @@ export function Field({
   value,
   placeholder,
   autoFocus,
+  type = 'text',
+  name,
+  autoComplete,
   onChange,
   onSubmit,
 }: FieldProps) {
@@ -41,6 +47,9 @@ export function Field({
       <Label htmlFor={id}>{label}</Label>
       <Input
         id={id}
+        type={type}
+        {...(name !== undefined ? { name } : {})}
+        {...(autoComplete !== undefined ? { autoComplete } : {})}
         value={value}
         placeholder={placeholder}
         autoFocus={autoFocus}
